@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Визуальная версия сайта Перспективного колледжа с презентацией кампуса, 3D-туром и программами обучения."
+    />
+    <title>Перспективный колледж | Визуальная версия</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <canvas class="background-canvas" aria-hidden="true"></canvas>
+    <div class="cursor-glow" aria-hidden="true"></div>
+    <div class="progress-line" aria-hidden="true"></div>
+
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="brand" href="#top" aria-label="Перейти к началу страницы">
+          <span class="brand-mark">ПК</span>
+          <span class="brand-text">Перспективный колледж</span>
+        </a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <span></span>
+          <span></span>
+        </button>
+
+        <nav class="site-nav" id="site-nav" aria-label="Главная навигация">
+          <a href="#tour">3D тур</a>
+          <a href="#programs">Программы</a>
+          <a href="#reviews">Отзывы</a>
+          <a href="#campus">Кампус</a>
+          <a href="#contact">Контакты</a>
+          <a class="button button-small button-ghost" href="#contact">Записаться</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero section" id="top">
+          <div class="hero-copy reveal">
+            <p class="eyebrow">Интерактивная презентация нового поколения</p>
+            <h1>Колледж, который видно до поступления</h1>
+            <p class="hero-text">
+              Покажите абитуриентам кампус, лаборатории и учебные маршруты в понятном визуальном формате.
+              Эта папка работает как самостоятельный сайт: откройте <strong>index.html</strong> в браузере.
+            </p>
+
+            <div class="hero-actions">
+              <a class="button" href="#tour">Открыть 3D тур</a>
+              <a class="button button-ghost" href="#programs">Смотреть программы</a>
+            </div>
+
+            <ul class="hero-badges" aria-label="Преимущества сайта">
+              <li>Готовая HTML-страница</li>
+              <li>Адаптивная верстка</li>
+              <li>Интерактивная карусель</li>
+              <li>Без сборки и зависимостей</li>
+            </ul>
+          </div>
+
+          <div class="hero-stage reveal" data-scene>
+            <div class="scene-frame">
+              <div class="scene-grid" data-float data-x="0" data-y="100" data-z="-40" data-depth="0.02" data-rx="76"></div>
+              <div class="scene-ring ring-a" data-float data-x="0" data-y="0" data-z="42" data-depth="0.04"></div>
+              <div class="scene-ring ring-b" data-float data-x="0" data-y="0" data-z="92" data-depth="0.06"></div>
+
+              <div class="scene-core" data-float data-x="0" data-y="0" data-z="142" data-depth="0.08">
+                <div class="scene-core__halo"></div>
+                <div class="scene-core__body"></div>
+                <div class="scene-core__pulse"></div>
+              </div>
+
+              <article class="float-panel float-panel--left" data-float data-x="-158" data-y="-118" data-z="190" data-depth="0.08">
+                <span class="panel-label">Маршрут</span>
+                <strong>06 зон</strong>
+                <p>Атриум, IT-лаборатория, медиацентр, мастерские, спорт и приемная комиссия.</p>
+              </article>
+
+              <article class="float-panel float-panel--right" data-float data-x="158" data-y="-118" data-z="210" data-depth="0.08">
+                <span class="panel-label">Формат</span>
+                <strong>Визуальный тур</strong>
+                <p>Карточки, мини-панорамы и быстрые подсказки для презентации колледжа.</p>
+              </article>
+
+              <article class="float-panel float-panel--bottom" data-float data-x="0" data-y="148" data-z="185" data-depth="0.06">
+                <span class="panel-label">Фокус</span>
+                <strong id="hero-scene-title">Главный атриум</strong>
+                <p>Активная точка синхронизируется с каруселью ниже.</p>
+              </article>
+
+              <div class="scan-line"></div>
+            </div>
+          </div>
+
+          <div class="stats-grid reveal">
+            <article class="stat-card" data-tilt>
+              <strong>06</strong>
+              <span>ключевых зон для знакомства с колледжем</span>
+            </article>
+            <article class="stat-card" data-tilt>
+              <strong>100%</strong>
+              <span>статический код, который открывается без сервера</span>
+            </article>
+            <article class="stat-card" data-tilt>
+              <strong>HTML</strong>
+              <span>все основные коды лежат в папке «визуал»</span>
+            </article>
+          </div>
+        </section>
+
+        <section class="tour section" id="tour">
+          <div class="section-head reveal">
+            <p class="eyebrow">Маршрут 3D тура</p>
+            <h2>Выберите зону кампуса и откройте быстрый просмотр</h2>
+            <p>
+              Карточки сделаны так, чтобы сайт выглядел нормально даже без загруженных панорам: фон, цвет,
+              теги и описание уже встроены в статическую версию.
+            </p>
+          </div>
+
+          <div class="tour-layout">
+            <aside class="tour-sidebar reveal">
+              <p class="eyebrow">Активная сцена</p>
+              <h3 id="active-title">Главный атриум</h3>
+              <p id="active-text">Пространство встречи, навигации и первых впечатлений о колледже.</p>
+
+              <div class="chip-row" id="active-tags" aria-label="Теги активной сцены">
+                <span>Навигация</span>
+                <span>Встречи</span>
+                <span>Кампус</span>
+              </div>
+
+              <div class="panorama-console" id="active-preview">
+                <div class="mini-orb visual-atrium" aria-hidden="true"><span>360</span></div>
+                <p>Двигайте мышью по карточкам тура: интерфейс реагирует и помогает удержать внимание.</p>
+              </div>
+
+              <div class="tour-controls">
+                <button class="control-button" type="button" data-step="-1">Назад</button>
+                <button class="control-button control-primary" type="button" data-step="1">Далее</button>
+              </div>
+
+              <ul class="tour-points">
+                <li>Открывается напрямую из папки</li>
+                <li>Работает на телефоне и компьютере</li>
+                <li>Подходит для демонстрации без интернета</li>
+              </ul>
+            </aside>
+
+            <div class="tour-stage reveal">
+              <div class="tour-carousel" aria-live="polite">
+                <article
+                  class="tour-card is-active"
+                  role="button"
+                  tabindex="0"
+                  data-title="Главный атриум"
+                  data-text="Пространство встречи, навигации и первых впечатлений о колледже."
+                  data-tags="Навигация,Встречи,Кампус"
+                  data-visual="visual-atrium"
+                  data-accent="#63d9ff"
+                >
+                  <span class="tour-card__index">01</span>
+                  <div class="tour-card__visual visual-atrium"><span></span><span></span><span></span></div>
+                  <div class="tour-card__copy">
+                    <h3>Главный атриум</h3>
+                    <p>Первый экран маршрута: стойка информации, зоны ожидания и навигация.</p>
+                    <span class="tour-card__hint">Нажмите, чтобы открыть просмотр</span>
+                  </div>
+                </article>
+
+                <article
+                  class="tour-card"
+                  role="button"
+                  tabindex="0"
+                  data-title="IT-лаборатория"
+                  data-text="Рабочая зона для веб-разработки, прототипирования и командных проектов."
+                  data-tags="Разработка,Проекты,Команды"
+                  data-visual="visual-lab"
+                  data-accent="#53f2c5"
+                >
+                  <span class="tour-card__index">02</span>
+                  <div class="tour-card__visual visual-lab"><span></span><span></span><span></span></div>
+                  <div class="tour-card__copy">
+                    <h3>IT-лаборатория</h3>
+                    <p>Компьютерные места, интерактивная доска и пространство для защиты проектов.</p>
+                    <span class="tour-card__hint">Нажмите, чтобы открыть просмотр</span>
+                  </div>
+                </article>
+
+                <article
+                  class="tour-card"
+                  role="button"
+                  tabindex="0"
+                  data-title="Медиацентр"
+                  data-text="Зона съемки, монтажа, звука и студенческого контента."
+                  data-tags="Медиа,Контент,Студия"
+                  data-visual="visual-media"
+                  data-accent="#ffca7a"
+                >
+                  <span class="tour-card__index">03</span>
+                  <div class="tour-card__visual visual-media"><span></span><span></span><span></span></div>
+                  <div class="tour-card__copy">
+                    <h3>Медиацентр</h3>
+                    <p>Площадка для видеопроектов, подкастов, дизайна и цифровой коммуникации.</p>
+                    <span class="tour-card__hint">Нажмите, чтобы открыть просмотр</span>
+                  </div>
+                </article>
+
+                <article
+                  class="tour-card"
+                  role="button"
+                  tabindex="0"
+                  data-title="Проектная мастерская"
+                  data-text="Гибкое пространство, где идеи быстро переходят в прототипы."
+                  data-tags="Прототипы,Практика,Инженерия"
+                  data-visual="visual-projects"
+                  data-accent="#9a7cff"
+                >
+                  <span class="tour-card__index">04</span>
+                  <div class="tour-card__visual visual-projects"><span></span><span></span><span></span></div>
+                  <div class="tour-card__copy">
+                    <h3>Проектная мастерская</h3>
+                    <p>Здесь студенты собирают макеты, тестируют решения и презентуют результаты.</p>
+                    <span class="tour-card__hint">Нажмите, чтобы открыть просмотр</span>
+                  </div>
+                </article>
+
+                <article
+                  class="tour-card"
+                  role="button"
+                  tabindex="0"
+                  data-title="Спортивная зона"
+                  data-text="Активное пространство для тренировок, командных игр и мероприятий."
+                  data-tags="Спорт,Команда,События"
+                  data-visual="visual-sport"
+                  data-accent="#7cffb2"
+                >
+                  <span class="tour-card__index">05</span>
+                  <div class="tour-card__visual visual-sport"><span></span><span></span><span></span></div>
+                  <div class="tour-card__copy">
+                    <h3>Спортивная зона</h3>
+                    <p>Место для активности, соревнований и восстановления между занятиями.</p>
+                    <span class="tour-card__hint">Нажмите, чтобы открыть просмотр</span>
+                  </div>
+                </article>
+
+                <article
+                  class="tour-card"
+                  role="button"
+                  tabindex="0"
+                  data-title="Приемная комиссия"
+                  data-text="Финальная точка маршрута: консультации, документы и следующие шаги."
+                  data-tags="Поступление,Документы,Консультация"
+                  data-visual="visual-admission"
+                  data-accent="#ff7ad9"
+                >
+                  <span class="tour-card__index">06</span>
+                  <div class="tour-card__visual visual-admission"><span></span><span></span><span></span></div>
+                  <div class="tour-card__copy">
+                    <h3>Приемная комиссия</h3>
+                    <p>Понятный финал презентации: куда обратиться и как начать поступление.</p>
+                    <span class="tour-card__hint">Нажмите, чтобы открыть просмотр</span>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="programs section" id="programs">
+          <div class="section-head reveal">
+            <p class="eyebrow">Направления</p>
+            <h2>Программы, которые выглядят современно и объясняются простым языком</h2>
+            <p>Каждая карточка делает акцент на результате обучения: что студент сможет сделать после практики.</p>
+          </div>
+
+          <div class="program-grid">
+            <article class="program-card reveal" data-tilt>
+              <span class="program-icon">01</span>
+              <h3>IT и разработка</h3>
+              <p>Веб-сайты, интерфейсы, сервисы, командная разработка и презентация готовых проектов.</p>
+            </article>
+            <article class="program-card reveal" data-tilt>
+              <span class="program-icon">02</span>
+              <h3>Робототехника</h3>
+              <p>Сенсоры, автоматизация, сборка прототипов и решение инженерных задач на практике.</p>
+            </article>
+            <article class="program-card reveal" data-tilt>
+              <span class="program-icon">03</span>
+              <h3>Медиа и контент</h3>
+              <p>Видео, звук, монтаж, брендинг и цифровая коммуникация для реальных студенческих задач.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="reviews section" id="reviews">
+          <div class="section-head reveal">
+            <p class="eyebrow">Отзывы</p>
+            <h2>Живые впечатления о колледже без рекламного пафоса</h2>
+            <p>
+              Ниже стоят демонстрационные примеры, чтобы блок выглядел правдоподобно в макете. Свой отзыв
+              можно написать через форму: он сохранится в этом браузере и появится первым в списке.
+            </p>
+          </div>
+
+          <div class="reviews-layout">
+            <div class="reviews-list reveal" id="reviews-list" aria-live="polite">
+              <article class="review-card" data-demo-review>
+                <div class="review-card__top">
+                  <span class="review-avatar">АМ</span>
+                  <div>
+                    <h3>Алина М.</h3>
+                    <p>студентка 2 курса, IT-направление</p>
+                  </div>
+                  <span class="review-badge">пример</span>
+                </div>
+                <div class="review-rating" aria-label="Оценка 5 из 5">★★★★★</div>
+                <p class="review-text">
+                  Больше всего нравится, что здесь не только теория. Уже на первом курсе мы делали небольшие
+                  сайты и разбирали реальные ошибки, а не просто переписывали конспект. Иногда темп быстрый,
+                  но если спрашивать, преподаватели нормально объясняют.
+                </p>
+                <span class="review-date">апрель 2026</span>
+              </article>
+
+              <article class="review-card" data-demo-review>
+                <div class="review-card__top">
+                  <span class="review-avatar">ИС</span>
+                  <div>
+                    <h3>Игорь С.</h3>
+                    <p>родитель абитуриента</p>
+                  </div>
+                  <span class="review-badge">пример</span>
+                </div>
+                <div class="review-rating" aria-label="Оценка 4 из 5">★★★★☆</div>
+                <p class="review-text">
+                  Были на дне открытых дверей. Понравилось, что показали аудитории и спокойно ответили на
+                  вопросы про практику и поступление. Не все кабинеты выглядят одинаково новыми, но по
+                  оборудованию и отношению впечатление осталось хорошее.
+                </p>
+                <span class="review-date">март 2026</span>
+              </article>
+
+              <article class="review-card" data-demo-review>
+                <div class="review-card__top">
+                  <span class="review-avatar">ДК</span>
+                  <div>
+                    <h3>Даниил К.</h3>
+                    <p>выпускник, медиа-направление</p>
+                  </div>
+                  <span class="review-badge">пример</span>
+                </div>
+                <div class="review-rating" aria-label="Оценка 5 из 5">★★★★★</div>
+                <p class="review-text">
+                  Колледж дал нормальную базу и портфолио. Самое полезное было в проектах: съемки, монтаж,
+                  дедлайны и защита перед группой. Не скажу, что все идеально, но если самому включаться,
+                  возможностей хватает.
+                </p>
+                <span class="review-date">февраль 2026</span>
+              </article>
+            </div>
+
+            <form class="review-form reveal" id="review-form">
+              <p class="eyebrow">Добавить отзыв</p>
+              <h3>Напишите свой отзыв</h3>
+              <p class="review-form__hint">
+                Лучше писать конкретно: что понравилось, что можно улучшить, где вы учились или почему
+                выбирали колледж.
+              </p>
+
+              <label>
+                Ваше имя
+                <input name="name" type="text" placeholder="Например: Мария П." maxlength="40" required />
+              </label>
+
+              <label>
+                Кто вы
+                <select name="role" required>
+                  <option value="">Выберите вариант</option>
+                  <option>студент</option>
+                  <option>выпускник</option>
+                  <option>родитель</option>
+                  <option>абитуриент</option>
+                  <option>гость дня открытых дверей</option>
+                </select>
+              </label>
+
+              <label>
+                Оценка
+                <select name="rating" required>
+                  <option value="5">5 — очень понравилось</option>
+                  <option value="4">4 — хорошо</option>
+                  <option value="3">3 — нормально</option>
+                  <option value="2">2 — есть проблемы</option>
+                </select>
+              </label>
+
+              <label>
+                Текст отзыва
+                <textarea
+                  name="text"
+                  rows="6"
+                  maxlength="620"
+                  placeholder="Напишите 2-4 предложения простым языком"
+                  required
+                ></textarea>
+              </label>
+
+              <button class="button" type="submit">Опубликовать отзыв</button>
+              <p class="review-form__status" id="review-form-status" role="status"></p>
+            </form>
+          </div>
+        </section>
+
+        <section class="campus section" id="campus">
+          <div class="campus-panel reveal">
+            <div>
+              <p class="eyebrow">Пространство</p>
+              <h2>Сайт показывает колледж как живую среду, а не просто список кабинетов</h2>
+              <p>
+                Визуальная версия подходит для первого показа: она быстро загружается, не требует сервера и
+                сохраняет ощущение технологичного кампуса.
+              </p>
+            </div>
+
+            <div class="campus-track">
+              <div class="track-step" data-tilt>
+                <strong>01</strong>
+                <span>Откройте страницу и покажите общий образ колледжа</span>
+              </div>
+              <div class="track-step" data-tilt>
+                <strong>02</strong>
+                <span>Переключайте зоны кампуса через интерактивную карусель</span>
+              </div>
+              <div class="track-step" data-tilt>
+                <strong>03</strong>
+                <span>Ведите абитуриента к программам и заявке на контакт</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="contact section" id="contact">
+          <div class="cta-panel reveal">
+            <div>
+              <p class="eyebrow">Готово к показу</p>
+              <h2>Все основные коды сайта лежат в папке «визуал»</h2>
+              <p>
+                Внутри находятся HTML, CSS и JavaScript. Страница открывается напрямую и сохраняет аккуратный
+                вид на компьютере, планшете и телефоне.
+              </p>
+            </div>
+
+            <div class="cta-actions">
+              <a class="button" href="#top">Вернуться к началу</a>
+              <a class="button button-ghost" href="#tour">Посмотреть тур</a>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <span>Перспективный колледж</span>
+        <span>Статическая визуальная версия сайта: HTML, CSS, JavaScript</span>
+      </footer>
+    </div>
+
+    <section class="tour-viewer" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Просмотр зоны кампуса">
+      <div class="tour-viewer__backdrop" data-close-viewer></div>
+      <div class="tour-viewer__panel">
+        <div class="tour-viewer__head">
+          <div>
+            <p class="eyebrow">Просмотр зоны</p>
+            <h3 id="viewer-title">Главный атриум</h3>
+          </div>
+          <button class="control-button" type="button" data-close-viewer>Закрыть</button>
+        </div>
+        <p class="tour-viewer__text" id="viewer-text">Пространство встречи, навигации и первых впечатлений о колледже.</p>
+        <div class="tour-panorama-view visual-atrium" id="viewer-visual" aria-hidden="true">
+          <span class="viewer-mark">360</span>
+        </div>
+        <div class="chip-row" id="viewer-tags" aria-label="Теги зоны кампуса">
+          <span>Навигация</span>
+          <span>Встречи</span>
+          <span>Кампус</span>
+        </div>
+      </div>
+    </section>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

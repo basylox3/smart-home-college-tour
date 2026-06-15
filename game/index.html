@@ -1,0 +1,3463 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campus Flow: Тур по колледжу</title>
+<style>
+    :root {
+        color-scheme: dark;
+        --bg: #08101d;
+        --panel: rgba(9, 20, 37, 0.86);
+        --panel-strong: rgba(10, 24, 45, 0.96);
+        --border: rgba(255, 255, 255, 0.1);
+        --text: #eef5ff;
+        --muted: #aac1d8;
+        --accent: #79f0ca;
+        --accent-soft: rgba(121, 240, 202, 0.14);
+        --warning: #ffd36e;
+        --danger: #ff8f8f;
+        --shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        overflow: hidden;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        overscroll-behavior: none;
+    }
+
+    canvas {
+        display: block;
+    }
+
+    #gameCanvas {
+        width: 100vw;
+        height: 100vh;
+        background: #8bc2dd;
+        touch-action: none;
+    }
+
+    .panel {
+        position: fixed;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: var(--panel);
+        backdrop-filter: blur(12px);
+        box-shadow: var(--shadow);
+    }
+
+    .panel-collapsible {
+        overflow: hidden;
+        transition: width 0.2s ease;
+    }
+
+    .panel-collapsible .panel-content {
+        margin-top: 10px;
+    }
+
+    .panel-collapsible.is-collapsed .panel-content {
+        display: none;
+    }
+
+    .panel-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .panel-head h2,
+    .panel-head h3 {
+        margin: 0;
+        line-height: 1.1;
+    }
+
+    .panel-btn {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        padding: 7px 12px;
+        font-size: 12px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .panel-btn:hover {
+        background: rgba(255, 255, 255, 0.11);
+    }
+
+    .tutorial {
+        top: 16px;
+        left: 16px;
+        width: min(330px, calc(100vw - 32px));
+        padding: 14px;
+        transition: width 0.2s ease;
+    }
+
+    .tutorial.is-collapsed {
+        width: min(250px, calc(100vw - 32px));
+    }
+
+    .tutorial-subtitle {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 13px;
+    }
+
+    .tutorial-summary {
+        margin-top: 10px;
+        padding: 9px 11px;
+        border-radius: 12px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: bold;
+        line-height: 1.35;
+    }
+
+    .tutorial-body {
+        margin-top: 12px;
+    }
+
+    .tutorial.is-collapsed .tutorial-body {
+        display: none;
+    }
+
+    .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .pill {
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.07);
+        color: var(--text);
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .tutorial-list {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--muted);
+        line-height: 1.48;
+        font-size: 14px;
+    }
+
+    .progress {
+        margin-top: 12px;
+        height: 10px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .progress-bar {
+        width: 0;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #4ed0a5 0%, #79f0ca 100%);
+    }
+
+    .stats {
+        top: 16px;
+        right: 16px;
+        width: min(290px, calc(100vw - 32px));
+        padding: 14px;
+    }
+
+    .stats.is-collapsed,
+    .quests.is-collapsed,
+    .detail.is-collapsed,
+    .minimap.is-collapsed {
+        width: min(220px, calc(100vw - 32px));
+    }
+
+    .stats-grid {
+        margin-top: 10px;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 8px 10px;
+        font-size: 14px;
+    }
+
+    .stats-grid strong {
+        color: var(--accent);
+    }
+
+    .quests {
+        top: 228px;
+        right: 16px;
+        width: min(290px, calc(100vw - 32px));
+        padding: 14px;
+    }
+
+    .quest-list {
+        margin-top: 10px;
+        display: grid;
+        gap: 8px;
+    }
+
+    .quest-item {
+        padding: 9px 10px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .quest-item.is-done {
+        background: rgba(121, 240, 202, 0.1);
+        border-color: rgba(121, 240, 202, 0.22);
+    }
+
+    .quest-title {
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    .quest-meta {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+    }
+
+    .detail {
+        left: 16px;
+        bottom: 92px;
+        width: min(370px, calc(100vw - 32px));
+        padding: 14px;
+    }
+
+    .detail h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+    }
+
+    .detail p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.5;
+        font-size: 14px;
+    }
+
+    .detail-tag {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(255, 211, 110, 0.13);
+        color: var(--warning);
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .minimap {
+        right: 16px;
+        bottom: 92px;
+        width: 250px;
+        padding: 12px;
+        background: var(--panel-strong);
+    }
+
+    .minimap canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .message {
+        position: fixed;
+        top: 18px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-8px);
+        padding: 10px 16px;
+        border-radius: 999px;
+        border: 1px solid rgba(121, 240, 202, 0.24);
+        background: rgba(10, 28, 41, 0.94);
+        color: var(--accent);
+        font-size: 14px;
+        font-weight: bold;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        box-shadow: var(--shadow);
+        z-index: 6;
+    }
+
+    .message.is-visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .screen-toggle {
+        position: fixed;
+        z-index: 9;
+        top: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 1px solid rgba(121, 240, 202, 0.24);
+        border-radius: 999px;
+        background: rgba(7, 16, 31, 0.9);
+        color: var(--text);
+        padding: 10px 16px;
+        font-weight: 900;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(12px);
+        cursor: pointer;
+    }
+
+    .game-ui-hidden .panel-collapsible,
+    .game-ui-hidden .hint {
+        display: none;
+    }
+
+    .dialogue {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: rgba(2, 7, 15, 0.58);
+        backdrop-filter: blur(5px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.18s ease;
+    }
+
+    .dialogue.is-open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .dialogue-card {
+        position: relative;
+        width: min(780px, calc(100vw - 32px));
+        overflow: hidden;
+        border: 1px solid rgba(121, 240, 202, 0.26);
+        border-radius: 26px;
+        background: linear-gradient(180deg, rgba(12, 27, 50, 0.98), rgba(5, 12, 26, 0.98));
+        box-shadow: 0 26px 80px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        transform: translateY(14px) scale(0.97);
+        transition: transform 0.18s ease;
+    }
+
+    .dialogue.is-open .dialogue-card {
+        transform: translateY(0) scale(1);
+    }
+
+    .dialogue-card::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent), #67b2ff, var(--warning));
+    }
+
+    .dialogue-layout {
+        display: grid;
+        grid-template-columns: 172px minmax(0, 1fr);
+        gap: 18px;
+        padding: 20px;
+    }
+
+    .dialogue-portrait {
+        --portrait-shirt: #2e69df;
+        --portrait-accent: #79f0ca;
+        --portrait-hair: #2f2530;
+        --portrait-skin: #f0c7a2;
+        position: relative;
+        min-height: 220px;
+        overflow: hidden;
+        border-radius: 22px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background:
+            radial-gradient(circle at 50% 24%, rgba(255, 255, 255, 0.22), transparent 25%),
+            radial-gradient(circle at 72% 14%, rgba(255, 211, 110, 0.2), transparent 22%),
+            linear-gradient(180deg, rgba(121, 240, 202, 0.18), rgba(103, 178, 255, 0.08));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .dialogue-portrait::before,
+    .dialogue-portrait::after {
+        content: "";
+        position: absolute;
+        inset: 12px;
+        border-radius: inherit;
+        pointer-events: none;
+    }
+
+    .dialogue-portrait::before {
+        border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .dialogue-portrait::after {
+        inset: auto 14px 12px;
+        height: 48px;
+        background: radial-gradient(circle, rgba(0, 0, 0, 0.22), transparent 68%);
+        filter: blur(8px);
+    }
+
+    .portrait-orbit,
+    .portrait-spark,
+    .portrait-nameplate,
+    .portrait-svg {
+        position: absolute;
+        z-index: 1;
+    }
+
+    .portrait-orbit {
+        inset: 16px;
+        border-radius: 999px;
+        border: 1px solid color-mix(in srgb, var(--portrait-accent), transparent 52%);
+        opacity: 0.74;
+        transform: rotate(-12deg);
+    }
+
+    .portrait-spark {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--portrait-accent);
+        box-shadow: 0 0 18px var(--portrait-accent);
+    }
+
+    .portrait-spark--one {
+        left: 22px;
+        top: 26px;
+    }
+
+    .portrait-spark--two {
+        right: 24px;
+        top: 58px;
+        width: 5px;
+        height: 5px;
+    }
+
+    .portrait-svg {
+        left: 50%;
+        bottom: 12px;
+        width: min(184px, 116%);
+        max-width: none;
+        transform: translateX(-50%);
+        filter: drop-shadow(0 18px 22px rgba(0, 0, 0, 0.34));
+    }
+
+    .portrait-nameplate {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-height: 28px;
+        padding: 5px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(6, 14, 28, 0.82);
+        color: var(--text);
+        font-size: 10px;
+        font-weight: 900;
+        backdrop-filter: blur(10px);
+    }
+
+    .portrait-nameplate span {
+        display: inline-flex;
+        width: 20px;
+        height: 20px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: var(--portrait-accent);
+        color: #06111f;
+    }
+
+    .dialogue-content {
+        min-width: 0;
+    }
+
+    .dialogue-topline {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .dialogue-title h3 {
+        margin: 0;
+        font-size: 24px;
+        line-height: 1.08;
+    }
+
+    .dialogue-progress {
+        margin-top: 8px;
+        display: inline-flex;
+        min-height: 28px;
+        align-items: center;
+        padding: 0 11px;
+        border-radius: 999px;
+        background: rgba(121, 240, 202, 0.12);
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 900;
+    }
+
+    .place-panel {
+        left: 50%;
+        bottom: 86px;
+        transform: translateX(-50%) translateY(10px);
+        width: min(620px, calc(100vw - 32px));
+        padding: 16px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        z-index: 6;
+    }
+
+    .place-panel.is-open {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .place-tag {
+        display: inline-flex;
+        margin-top: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(121, 240, 202, 0.13);
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 900;
+    }
+
+    .place-text {
+        margin-top: 10px;
+        color: var(--muted);
+        line-height: 1.56;
+        font-size: 14px;
+    }
+
+    .place-tip {
+        margin-top: 10px;
+        color: var(--warning);
+        font-size: 12px;
+    }
+
+    .dialogue-role {
+        margin-top: 6px;
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    .dialogue-text {
+        min-height: 96px;
+        margin-top: 14px;
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(0, 0, 0, 0.16);
+        color: var(--text);
+        line-height: 1.58;
+        font-size: 16px;
+    }
+
+    .dialogue-choice {
+        margin-top: 12px;
+        padding: 11px 13px;
+        border-radius: 16px;
+        border: 1px solid rgba(121, 240, 202, 0.22);
+        background: rgba(121, 240, 202, 0.1);
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .dialogue-tip {
+        margin-top: 10px;
+        font-size: 12px;
+        color: var(--warning);
+    }
+
+    .dialogue-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 14px;
+        flex-wrap: wrap;
+    }
+
+    .dialogue-next {
+        min-width: 120px;
+        border-color: rgba(121, 240, 202, 0.42);
+        background: linear-gradient(135deg, rgba(121, 240, 202, 0.95), rgba(103, 178, 255, 0.86));
+        color: #06111f;
+    }
+
+    .hint {
+        position: fixed;
+        left: 50%;
+        bottom: 18px;
+        transform: translateX(-50%);
+        width: min(620px, calc(100vw - 32px));
+        padding: 12px 16px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: rgba(7, 16, 31, 0.92);
+        box-shadow: var(--shadow);
+        text-align: center;
+        color: var(--text);
+        font-size: 15px;
+    }
+
+    .finish-overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(3, 8, 16, 0.72);
+        backdrop-filter: blur(6px);
+        z-index: 8;
+    }
+
+    .finish-overlay.is-open {
+        display: flex;
+    }
+
+    .finish-card {
+        width: min(620px, calc(100vw - 32px));
+        padding: 24px;
+        border-radius: 22px;
+        border: 1px solid rgba(121, 240, 202, 0.18);
+        background: rgba(10, 22, 42, 0.96);
+        box-shadow: var(--shadow);
+    }
+
+    .finish-card h2 {
+        margin: 0 0 10px;
+        font-size: 28px;
+    }
+
+    .finish-card p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.55;
+    }
+
+    .finish-stats {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .finish-stat {
+        padding: 12px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .finish-stat strong {
+        display: block;
+        color: var(--accent);
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+
+    .finish-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 18px;
+        flex-wrap: wrap;
+    }
+
+    .mobile-controls {
+        position: fixed;
+        left: 14px;
+        right: 14px;
+        bottom: 70px;
+        z-index: 7;
+        display: none;
+        align-items: flex-end;
+        grid-template-columns: auto minmax(120px, 1fr) auto;
+        gap: 14px;
+        pointer-events: none;
+    }
+
+    .mobile-dpad {
+        display: grid;
+        grid-template-columns: repeat(3, 54px);
+        grid-template-rows: repeat(3, 54px);
+        gap: 8px;
+    }
+
+    .mobile-btn {
+        width: 54px;
+        height: 54px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 18px;
+        background: rgba(7, 16, 31, 0.88);
+        color: var(--text);
+        font-size: 24px;
+        font-weight: 900;
+        pointer-events: auto;
+        touch-action: none;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(12px);
+    }
+
+    .mobile-btn:active,
+    .mobile-btn.is-pressed {
+        transform: translateY(2px) scale(0.98);
+        border-color: rgba(121, 240, 202, 0.55);
+        background: rgba(121, 240, 202, 0.18);
+    }
+
+    .mobile-up {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .mobile-left {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .mobile-down {
+        grid-column: 2;
+        grid-row: 3;
+    }
+
+    .mobile-right {
+        grid-column: 3;
+        grid-row: 2;
+    }
+
+    .mobile-action {
+        width: 86px;
+        height: 86px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, rgba(121, 240, 202, 0.92), rgba(103, 178, 255, 0.88));
+        color: #07101d;
+        font-size: 24px;
+    }
+
+    .mobile-action span {
+        display: block;
+        margin-top: 2px;
+        font-size: 10px;
+        line-height: 1;
+        text-transform: uppercase;
+    }
+
+    .mobile-slider {
+        align-self: end;
+        min-width: 0;
+        padding: 10px 12px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 18px;
+        background: rgba(7, 16, 31, 0.88);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(12px);
+        pointer-events: auto;
+    }
+
+    .mobile-slider label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .mobile-slider input {
+        width: 100%;
+        accent-color: var(--accent);
+        appearance: none;
+        background: transparent;
+        touch-action: pan-x;
+    }
+
+    .mobile-slider input::-webkit-slider-runnable-track {
+        height: 10px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, rgba(103, 178, 255, 0.42), rgba(121, 240, 202, 0.75), rgba(103, 178, 255, 0.42));
+    }
+
+    .mobile-slider input::-webkit-slider-thumb {
+        width: 28px;
+        height: 28px;
+        margin-top: -9px;
+        border-radius: 50%;
+        border: 3px solid #06111f;
+        background: var(--accent);
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.36);
+        appearance: none;
+    }
+
+    .mobile-slider input::-moz-range-track {
+        height: 10px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, rgba(103, 178, 255, 0.42), rgba(121, 240, 202, 0.75), rgba(103, 178, 255, 0.42));
+    }
+
+    .mobile-slider input::-moz-range-thumb {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 3px solid #06111f;
+        background: var(--accent);
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.36);
+    }
+
+    @media (max-width: 980px) {
+        .stats {
+            top: auto;
+            bottom: 380px;
+        }
+
+        .quests {
+            top: auto;
+            bottom: 258px;
+        }
+
+        .minimap {
+            width: 220px;
+        }
+    }
+
+@media (max-width: 760px) {
+        .mobile-controls {
+            display: grid;
+        }
+
+        .screen-toggle {
+            top: 12px;
+            right: 12px;
+            bottom: auto;
+            left: auto;
+            transform: none;
+            padding: 9px 13px;
+            font-size: 12px;
+        }
+
+        .tutorial,
+        .stats,
+        .quests,
+        .detail,
+        .minimap {
+            width: calc(100vw - 24px);
+            left: 12px;
+            right: 12px;
+        }
+
+        .tutorial {
+            top: 12px;
+        }
+
+        .stats {
+            top: auto;
+            bottom: auto;
+            top: 112px;
+        }
+
+        .quests {
+            top: auto;
+            display: none;
+        }
+
+        .detail {
+            display: none;
+        }
+
+        .minimap {
+            width: 172px;
+            left: auto;
+            right: 12px;
+            bottom: 168px;
+        }
+
+        .dialogue {
+            padding: 12px;
+        }
+
+        .dialogue-card {
+            width: calc(100vw - 24px);
+            max-height: calc(100vh - 24px);
+            overflow: auto;
+        }
+
+        .dialogue-layout {
+            grid-template-columns: 96px minmax(0, 1fr);
+            gap: 12px;
+            padding: 14px;
+        }
+
+        .dialogue-portrait {
+            min-height: 142px;
+            border-radius: 18px;
+        }
+
+        .dialogue-portrait::before {
+            inset: 8px;
+        }
+
+        .dialogue-portrait::after {
+            inset: auto 8px 8px;
+            height: 34px;
+        }
+
+        .portrait-orbit {
+            inset: 10px;
+        }
+
+        .portrait-svg {
+            bottom: 10px;
+            width: 128px;
+        }
+
+        .portrait-nameplate {
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            min-height: 24px;
+            font-size: 8px;
+        }
+
+        .portrait-nameplate span {
+            width: 17px;
+            height: 17px;
+        }
+
+        .dialogue-title h3 {
+            font-size: 19px;
+        }
+
+        .dialogue-text {
+            min-height: 86px;
+            padding: 13px;
+            font-size: 14px;
+        }
+
+        .dialogue-choice {
+            font-size: 13px;
+        }
+
+        .dialogue-actions {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .place-panel {
+            width: calc(100vw - 24px);
+            bottom: 90px;
+        }
+
+        .hint {
+            width: calc(100vw - 24px);
+            bottom: 12px;
+            border-radius: 16px;
+            font-size: 14px;
+        }
+
+        .game-ui-hidden .screen-toggle {
+            top: 12px;
+            right: 12px;
+            bottom: auto;
+        }
+
+        .game-ui-hidden .mobile-controls {
+            display: grid;
+        }
+
+        .message {
+            width: calc(100vw - 24px);
+            text-align: center;
+            border-radius: 16px;
+        }
+
+        .finish-stats {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 460px) {
+        .mobile-controls {
+            left: 8px;
+            right: 8px;
+            bottom: 68px;
+            grid-template-columns: auto minmax(72px, 1fr) auto;
+            gap: 8px;
+        }
+
+        .mobile-dpad {
+            grid-template-columns: repeat(3, 48px);
+            grid-template-rows: repeat(3, 48px);
+            gap: 7px;
+        }
+
+        .mobile-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+        }
+
+        .mobile-action {
+            width: 78px;
+            height: 78px;
+        }
+
+        .mobile-slider {
+            padding: 8px;
+            border-radius: 16px;
+        }
+
+        .mobile-slider label {
+            margin-bottom: 6px;
+            font-size: 9px;
+        }
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+        .mobile-controls {
+            display: grid;
+        }
+    }
+</style>
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+<button class="screen-toggle" type="button" id="screenToggle">Свернуть всё</button>
+
+<section class="panel panel-collapsible tutorial" id="tutorialPanel">
+    <div class="panel-head">
+        <div>
+            <h2>Campus Flow</h2>
+            <div class="tutorial-subtitle">Детализированный тур по открытому кампусу и главному корпусу колледжа.</div>
+        </div>
+        <button class="panel-btn" type="button" id="tutorialToggle">Скрыть</button>
+    </div>
+    <div class="panel-content">
+        <div class="tutorial-summary" id="tutorialSummary">Шаг 1. Осмотри уличные зоны и познакомься с людьми кампуса.</div>
+        <div class="tutorial-body">
+            <div class="pill-row">
+                <span class="pill">W A S D</span>
+                <span class="pill">Стрелки</span>
+                <span class="pill">E / Enter</span>
+                <span class="pill">Ползунок</span>
+                <span class="pill">Ц Ф Ы В</span>
+            </div>
+            <ol class="tutorial-list">
+                <li>Исследуй уличный маршрут: площадь, сад, амфитеатр и спортивную зону.</li>
+                <li>Подходи к персонажам и читай RPG-диалоги по центру экрана.</li>
+                <li>Следуй за стрелкой цели: она приведёт к кабинетам, людям и лестнице на 2 этаж.</li>
+                <li>На телефоне используй D-pad и нижний ползунок для движения.</li>
+            </ol>
+        </div>
+        <div class="progress" aria-hidden="true">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+</section>
+
+<section class="panel panel-collapsible stats" id="statsPanel">
+    <div class="panel-head">
+        <h3>Навигация</h3>
+        <button class="panel-btn" type="button" id="statsToggle">Скрыть</button>
+    </div>
+    <div class="panel-content">
+        <div class="stats-grid">
+            <strong>Сцена:</strong>
+            <span id="sceneLabel">Кампус</span>
+            <strong>Зона:</strong>
+            <span id="zoneLabel">Стартовая площадь</span>
+            <strong>Маршрут:</strong>
+            <span id="routeLabel">0 / 12</span>
+            <strong>Персонажи:</strong>
+            <span id="npcLabel">0 / 8</span>
+            <strong>Диалоги:</strong>
+            <span id="talkLabel">0 / 8</span>
+            <strong>Баллы:</strong>
+            <span id="scoreLabel">0</span>
+            <strong>Цель:</strong>
+            <span id="missionLabel">Осмотреть наружный маршрут</span>
+        </div>
+    </div>
+</section>
+
+<section class="panel panel-collapsible quests" id="questsPanel">
+    <div class="panel-head">
+        <h3>Задания</h3>
+        <button class="panel-btn" type="button" id="questsToggle">Скрыть</button>
+    </div>
+    <div class="panel-content">
+        <div class="quest-list" id="questList"></div>
+    </div>
+</section>
+
+<section class="panel panel-collapsible detail" id="detailPanel">
+    <div class="panel-head">
+        <h3 id="detailTitle">Новый проект</h3>
+        <button class="panel-btn" type="button" id="detailToggle">Скрыть</button>
+    </div>
+    <div class="panel-content">
+        <p id="detailText">Новый вариант тура сочетает открытый кампус, стеклянный атриум, персонажей и связанный квестовый маршрут.</p>
+        <span class="detail-tag" id="detailTag">Концепция: открытый кампус</span>
+    </div>
+</section>
+
+<section class="panel panel-collapsible minimap" id="minimapPanel">
+    <div class="panel-head">
+        <h3>Мини-карта</h3>
+        <button class="panel-btn" type="button" id="minimapToggle">Скрыть</button>
+    </div>
+    <div class="panel-content">
+        <canvas id="minimapCanvas" width="226" height="154"></canvas>
+    </div>
+</section>
+
+<div class="message" id="messageBanner">Маршрут обновлён</div>
+
+<section class="dialogue" id="dialoguePanel" aria-hidden="true">
+    <div class="dialogue-card" role="dialog" aria-modal="true" aria-labelledby="dialogueName">
+        <div class="dialogue-layout">
+            <div class="dialogue-portrait" id="dialoguePortrait" aria-hidden="true">
+                <span class="portrait-orbit"></span>
+                <span class="portrait-spark portrait-spark--one"></span>
+                <span class="portrait-spark portrait-spark--two"></span>
+                <div class="portrait-nameplate"><span>?</span>NPC</div>
+            </div>
+            <div class="dialogue-content">
+                <div class="dialogue-topline">
+                    <div class="dialogue-title">
+                        <h3 id="dialogueName">Персонаж</h3>
+                        <div class="dialogue-role" id="dialogueRole">роль</div>
+                    </div>
+                    <button class="panel-btn" type="button" id="dialogueClose">Закрыть</button>
+                </div>
+                <div class="dialogue-progress" id="dialogueProgress">Реплика 1 / 1</div>
+                <div class="dialogue-text" id="dialogueText">текст</div>
+                <div class="dialogue-choice" id="dialogueChoice">Твой ответ: продолжить разговор</div>
+                <div class="dialogue-actions">
+                    <div class="dialogue-tip" id="dialogueTip">Нажми E, Enter или кнопку, чтобы продолжить диалог.</div>
+                    <button class="panel-btn dialogue-next" type="button" id="dialogueNext">Дальше</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="panel place-panel" id="placePanel" aria-hidden="true">
+    <div class="panel-head">
+        <h3 id="placeTitle">Место</h3>
+        <button class="panel-btn" type="button" id="placeClose">Закрыть</button>
+    </div>
+    <span class="place-tag" id="placeTag">Зона</span>
+    <div class="place-text" id="placeText">Описание места</div>
+    <div class="place-tip">Нажми E, Enter, Escape или кнопку, чтобы закрыть описание.</div>
+</section>
+
+<div class="hint" id="hintLabel">Используй W A S D, стрелки или экранные кнопки, чтобы начать маршрут.</div>
+
+<div class="mobile-controls" aria-label="Мобильное управление">
+    <div class="mobile-dpad" aria-label="Движение">
+        <button class="mobile-btn mobile-up" type="button" data-key="arrowup" aria-label="Вверх">↑</button>
+        <button class="mobile-btn mobile-left" type="button" data-key="arrowleft" aria-label="Влево">←</button>
+        <button class="mobile-btn mobile-right" type="button" data-key="arrowright" aria-label="Вправо">→</button>
+        <button class="mobile-btn mobile-down" type="button" data-key="arrowdown" aria-label="Вниз">↓</button>
+    </div>
+    <div class="mobile-slider" aria-label="Горизонтальное движение">
+        <label for="mobileMoveSlider">Ползунок движения</label>
+        <input id="mobileMoveSlider" type="range" min="-1" max="1" step="0.05" value="0" aria-label="Двигаться влево или вправо">
+    </div>
+    <button class="mobile-btn mobile-action" type="button" data-key="e" aria-label="Действие">
+        E
+        <span>действие</span>
+    </button>
+</div>
+
+<section class="finish-overlay" id="finishOverlay">
+    <div class="finish-card">
+        <h2>Тур завершён</h2>
+        <p id="finishText">Ты полностью прошёл маршрут нового кампуса, изучил пространства и поговорил с людьми колледжа.</p>
+        <div class="finish-stats" id="finishStats"></div>
+        <div class="finish-actions">
+            <button class="panel-btn" type="button" id="restartGame">Начать заново</button>
+            <button class="panel-btn" type="button" id="closeFinish">Закрыть</button>
+        </div>
+    </div>
+</section>
+
+<script>
+const gameCanvas = document.getElementById("gameCanvas");
+const gameCtx = gameCanvas.getContext("2d");
+const minimapCanvas = document.getElementById("minimapCanvas");
+const minimapCtx = minimapCanvas.getContext("2d");
+const screenToggle = document.getElementById("screenToggle");
+
+const tutorialPanel = document.getElementById("tutorialPanel");
+const tutorialToggle = document.getElementById("tutorialToggle");
+const tutorialSummary = document.getElementById("tutorialSummary");
+const progressBar = document.getElementById("progressBar");
+const statsPanel = document.getElementById("statsPanel");
+const statsToggle = document.getElementById("statsToggle");
+const questsPanel = document.getElementById("questsPanel");
+const questsToggle = document.getElementById("questsToggle");
+const detailPanel = document.getElementById("detailPanel");
+const detailToggle = document.getElementById("detailToggle");
+const minimapPanel = document.getElementById("minimapPanel");
+const minimapToggle = document.getElementById("minimapToggle");
+
+const sceneLabel = document.getElementById("sceneLabel");
+const zoneLabel = document.getElementById("zoneLabel");
+const routeLabel = document.getElementById("routeLabel");
+const npcLabel = document.getElementById("npcLabel");
+const talkLabel = document.getElementById("talkLabel");
+const scoreLabel = document.getElementById("scoreLabel");
+const missionLabel = document.getElementById("missionLabel");
+const questList = document.getElementById("questList");
+
+const detailTitle = document.getElementById("detailTitle");
+const detailText = document.getElementById("detailText");
+const detailTag = document.getElementById("detailTag");
+const hintLabel = document.getElementById("hintLabel");
+const messageBanner = document.getElementById("messageBanner");
+
+const dialoguePanel = document.getElementById("dialoguePanel");
+const dialogueName = document.getElementById("dialogueName");
+const dialogueRole = document.getElementById("dialogueRole");
+const dialogueText = document.getElementById("dialogueText");
+const dialoguePortrait = document.getElementById("dialoguePortrait");
+const dialogueProgress = document.getElementById("dialogueProgress");
+const dialogueChoice = document.getElementById("dialogueChoice");
+const dialogueTip = document.getElementById("dialogueTip");
+const dialogueClose = document.getElementById("dialogueClose");
+const dialogueNext = document.getElementById("dialogueNext");
+const placePanel = document.getElementById("placePanel");
+const placeTitle = document.getElementById("placeTitle");
+const placeTag = document.getElementById("placeTag");
+const placeText = document.getElementById("placeText");
+const placeClose = document.getElementById("placeClose");
+const mobileMoveSlider = document.getElementById("mobileMoveSlider");
+
+const finishOverlay = document.getElementById("finishOverlay");
+const finishText = document.getElementById("finishText");
+const finishStats = document.getElementById("finishStats");
+const restartGame = document.getElementById("restartGame");
+const closeFinish = document.getElementById("closeFinish");
+
+const keys = Object.create(null);
+
+const dialogueScripts = {
+    "co-guide": [
+        "Привет. Сначала изучи площадь и бульвар, а потом заходи в атриум. Так тур читается намного лучше.",
+        "Если потеряешься, смотри на мини-карту: желтые точки - зоны, фиолетовые - персонажи.",
+        "Главный вход подсвечивается, когда ты рядом. Нажми E, чтобы перейти внутрь корпуса."
+    ],
+    "co-engineer": [
+        "Наши проекты всегда показывают в связке с реальной средой кампуса. Обрати внимание, как павильон связан с площадью.",
+        "В инженерных зонах студенты быстро переходят от макета к прототипу: идея, сборка, тест, защита.",
+        "Когда зайдешь внутрь, найди лабораторию робототехники. Она логически продолжает этот павильон."
+    ],
+    "co-gardener": [
+        "Сад нужен не только для красоты. Он даёт передышку перед более шумными точками маршрута.",
+        "Здесь хорошо проводить короткие консультации и встречи перед защитой проектов.",
+        "Попробуй открыть описание сада по E, когда стоишь внутри зеленой зоны."
+    ],
+    "co-coach": [
+        "Спортзона завершает наружный маршрут. После неё логично вернуться к главному входу и перейти внутрь.",
+        "На открытых площадках можно проводить командные активности и дни здоровья.",
+        "Маршрут специально сделан кольцом: ты видишь не только кабинеты, но и жизнь вокруг корпуса."
+    ],
+    "ci-host": [
+        "Внутри начни с атриума, а потом переходи в лаборатории и библиотеку. Так пространство раскрывается по логике проекта.",
+        "Атриум работает как навигационный центр: отсюда легче понять, где учебные зоны, отдых и проектные кабинеты.",
+        "Если хочешь узнать о конкретном помещении, встань в его зону и нажми E."
+    ],
+    "ci-mentor": [
+        "Робототехника у нас всегда рядом с maker space. Это удобно для быстрых переходов от идеи к сборке.",
+        "Студенты не просто слушают теорию: они собирают макеты, проверяют датчики и защищают результат.",
+        "Зона лаборатории дает больше очков, если открыть её описание и поговорить с наставником."
+    ],
+    "ci-librarian": [
+        "Библиотека расположена в тихой части плана, чтобы внутри маршрута был спокойный учебный акцент.",
+        "Здесь можно готовиться к проектам, искать источники и работать в небольших группах.",
+        "После активных лабораторий библиотека помогает сбалансировать маршрут."
+    ],
+    "ci-barista": [
+        "Кафе завершает тур мягко. После насыщенных лабораторий здесь удобно остановиться и обсудить впечатления.",
+        "Это не просто буфет, а место неформального общения, встреч и коротких презентаций.",
+        "Когда закроешь все зоны и диалоги, игра покажет итог прохождения."
+    ],
+    "ci-advisor": [
+        "Приёмная комиссия помогает быстро понять, какие направления подходят именно тебе.",
+        "Здесь обычно объясняют документы, сроки и показывают короткий маршрут по кабинетам.",
+        "После первого этажа обязательно поднимись выше: на втором этаже больше учебных кабинетов."
+    ],
+    "ci-medic": [
+        "Медкабинет нужен не только для справок. Это точка безопасности на большом маршруте.",
+        "Если в колледже проходит мероприятие, мы всегда рядом с активными зонами и лестницей.",
+        "На втором этаже тоже есть спокойные учебные пространства, но вход туда через лестницу в атриуме."
+    ],
+    "ci-programmer": [
+        "Это кабинет программирования. Здесь удобно разбирать код, интерфейсы и командные проекты.",
+        "Второй этаж сделан как учебный уровень: меньше шума, больше кабинетов для занятий.",
+        "Если видишь стрелку цели, она поможет не пропустить остальные аудитории."
+    ],
+    "ci-cyber": [
+        "В киберлаборатории тренируются защищать сети, находить уязвимости и читать логи.",
+        "Такие кабинеты лучше размещать рядом с IT-классами, чтобы студенты быстро переходили между задачами.",
+        "Осмотри соседние аудитории: второй этаж теперь стал полноценной частью маршрута."
+    ],
+    "ci-chemist": [
+        "Естественно-научный кабинет показывает, что маршрут не ограничен только IT и медиа.",
+        "Здесь можно проводить опыты, демонстрации и междисциплинарные занятия.",
+        "После осмотра кабинета найди преподавательскую и медиастудию."
+    ],
+    "ci-media": [
+        "Медиастудия на втором этаже нужна для записи, монтажа и подготовки презентаций.",
+        "Здесь студенты превращают проекты в понятные истории: видео, звук, визуал и защита.",
+        "Когда закончишь второй этаж, вернись по лестнице вниз или закрой оставшиеся диалоги."
+    ],
+    "ci-curator": [
+        "Преподавательская помогает маршруту ощущаться живым: здесь координируют занятия и проекты.",
+        "Второй этаж теперь работает как учебный блок с кабинетами, лабораториями и людьми.",
+        "Если все зоны и разговоры закрыты, игра покажет итог прохождения."
+    ]
+};
+
+const player = {
+    x: 0,
+    y: 0,
+    size: 24,
+    speed: 3.4
+};
+
+const state = {
+    inside: false,
+    floor: 1,
+    visitedHotspots: new Set(),
+    foundNpcs: new Set(),
+    spokenNpcs: new Set(),
+    score: 0,
+    activeHotspot: null,
+    activeNpc: null,
+    interactionTarget: null,
+    tutorialCollapsed: false,
+    tutorialAutoCollapsed: false,
+    dialogueOpen: false,
+    dialogueNpcId: "",
+    dialogueIndex: 0,
+    dialogueTextFull: "",
+    dialogueReveal: 0,
+    locationOpen: false,
+    locationHotspotId: "",
+    inspectedHotspots: new Set(),
+    uiHidden: false,
+    actionQueued: false,
+    mobileSliderX: 0,
+    messageText: "",
+    messageTimer: 0,
+    finishShown: false,
+    finishOpen: false,
+    initialized: false,
+    frame: 0
+};
+
+document.addEventListener("keydown", (event) => {
+    const key = event.key.toLowerCase();
+
+    if ((key === "e" || key === "у" || key === "enter") && !keys[key]) {
+        state.actionQueued = true;
+    }
+
+    if (key === "escape" && state.locationOpen) {
+        closePlace();
+    }
+
+    if (key === "escape" && state.dialogueOpen) {
+        closeDialogue();
+    }
+
+    keys[key] = true;
+});
+
+document.addEventListener("keyup", (event) => {
+    keys[event.key.toLowerCase()] = false;
+});
+
+window.addEventListener("message", (event) => {
+    if (!event.data || event.data.type !== "campus-flow-key") {
+        return;
+    }
+
+    setVirtualKey(event.data.key, Boolean(event.data.pressed));
+});
+
+tutorialToggle.addEventListener("click", () => {
+    setTutorialCollapsed(!state.tutorialCollapsed, false);
+});
+
+statsToggle.addEventListener("click", () => {
+    togglePanel(statsPanel, statsToggle);
+});
+
+questsToggle.addEventListener("click", () => {
+    togglePanel(questsPanel, questsToggle);
+});
+
+detailToggle.addEventListener("click", () => {
+    togglePanel(detailPanel, detailToggle);
+});
+
+minimapToggle.addEventListener("click", () => {
+    togglePanel(minimapPanel, minimapToggle);
+});
+
+dialogueClose.addEventListener("click", closeDialogue);
+dialogueNext.addEventListener("click", advanceDialogue);
+placeClose.addEventListener("click", closePlace);
+screenToggle.addEventListener("click", () => {
+    state.uiHidden = !state.uiHidden;
+    document.body.classList.toggle("game-ui-hidden", state.uiHidden);
+    screenToggle.textContent = state.uiHidden ? "Показать интерфейс" : "Свернуть всё";
+});
+restartGame.addEventListener("click", () => window.location.reload());
+closeFinish.addEventListener("click", () => {
+    state.finishOpen = false;
+    finishOverlay.classList.remove("is-open");
+});
+
+document.querySelectorAll(".mobile-btn[data-key]").forEach((button) => {
+    const key = button.dataset.key;
+
+    const press = (event) => {
+        event.preventDefault();
+        setVirtualKey(key, true);
+        button.classList.add("is-pressed");
+    };
+
+    const release = (event) => {
+        event.preventDefault();
+        setVirtualKey(key, false);
+        button.classList.remove("is-pressed");
+    };
+
+    button.addEventListener("pointerdown", press);
+    button.addEventListener("pointerup", release);
+    button.addEventListener("pointercancel", release);
+    button.addEventListener("pointerleave", release);
+});
+
+if (mobileMoveSlider) {
+    const updateSliderMove = () => {
+        const value = Number(mobileMoveSlider.value) || 0;
+        state.mobileSliderX = Math.abs(value) < 0.08 ? 0 : value;
+
+        if (state.mobileSliderX && !state.tutorialAutoCollapsed) {
+            setTutorialCollapsed(true, true);
+        }
+    };
+
+    const resetSliderMove = () => {
+        mobileMoveSlider.value = "0";
+        state.mobileSliderX = 0;
+    };
+
+    mobileMoveSlider.addEventListener("input", updateSliderMove);
+    mobileMoveSlider.addEventListener("change", resetSliderMove);
+    mobileMoveSlider.addEventListener("pointerup", resetSliderMove);
+    mobileMoveSlider.addEventListener("pointercancel", resetSliderMove);
+    mobileMoveSlider.addEventListener("touchend", resetSliderMove, { passive: true });
+    mobileMoveSlider.addEventListener("blur", resetSliderMove);
+}
+
+function setVirtualKey(key, pressed) {
+    if (!key) {
+        return;
+    }
+
+    const normalized = String(key).toLowerCase();
+
+    if (pressed && (normalized === "e" || normalized === "у" || normalized === "enter")) {
+        state.actionQueued = true;
+    }
+
+    keys[normalized] = pressed;
+
+    if (pressed && !state.tutorialAutoCollapsed) {
+        setTutorialCollapsed(true, true);
+    }
+}
+
+function rect(x, y, w, h) {
+    return { x, y, w, h };
+}
+
+function getScale() {
+    const scale = Math.min(gameCanvas.width / 1440, gameCanvas.height / 900);
+    return Math.max(0.58, Math.min(scale, 1.12));
+}
+
+function resizeCanvas() {
+    gameCanvas.width = window.innerWidth;
+    gameCanvas.height = window.innerHeight;
+
+    if (!state.initialized) {
+        placePlayerOutside();
+        state.initialized = true;
+    }
+
+    clampPlayer();
+}
+
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
+if (window.matchMedia("(max-width: 760px), (hover: none) and (pointer: coarse)").matches) {
+    setTutorialCollapsed(true, false);
+    setPanelCollapsed(statsPanel, statsToggle, true);
+    setPanelCollapsed(questsPanel, questsToggle, true);
+    setPanelCollapsed(detailPanel, detailToggle, true);
+}
+
+function getOutdoorLayout() {
+    const s = getScale();
+    const centerX = gameCanvas.width / 2;
+    const top = 46 * s;
+
+    const northBar = rect(centerX - 250 * s, top, 500 * s, 64 * s);
+    const westWing = rect(centerX - 250 * s, top + 82 * s, 170 * s, 184 * s);
+    const eastWing = rect(centerX + 80 * s, top + 82 * s, 170 * s, 184 * s);
+    const atrium = rect(centerX - 80 * s, top + 82 * s, 160 * s, 184 * s);
+
+    const entryZone = rect(centerX - 76 * s, atrium.y + atrium.h + 10 * s, 152 * s, 36 * s);
+    const frontPlaza = rect(centerX - 260 * s, atrium.y + atrium.h + 10 * s, 520 * s, 168 * s);
+    const boulevard = rect(centerX - 58 * s, frontPlaza.y + 28 * s, 116 * s, gameCanvas.height - frontPlaza.y - 28 * s);
+    const garden = rect(72 * s, 276 * s, 264 * s, 176 * s);
+    const waterCourt = rect(gameCanvas.width - 72 * s - 264 * s, 276 * s, 264 * s, 176 * s);
+    const amphitheater = rect(76 * s, gameCanvas.height - 224 * s, 270 * s, 138 * s);
+    const sportsDeck = rect(gameCanvas.width - 76 * s - 270 * s, gameCanvas.height - 224 * s, 270 * s, 138 * s);
+
+    const blockers = [northBar, westWing, eastWing, atrium];
+
+    const hotspots = [
+        { id: "o-plaza", name: "Парадная площадь", tag: "Общественная зона", description: "Площадь работает как входная сцена колледжа и собирает движение к атриуму.", area: rect(frontPlaza.x + 80 * s, frontPlaza.y + 18 * s, frontPlaza.w - 160 * s, 90 * s), points: 12 },
+        { id: "o-boulevard", name: "Бульвар кампуса", tag: "Маршрут", description: "Главная ось кампуса соединяет вход, события и прогулочные зоны участка.", area: rect(boulevard.x - 18 * s, boulevard.y + 44 * s, boulevard.w + 36 * s, 180 * s), points: 10 },
+        { id: "o-garden", name: "Скульптурный сад", tag: "Ландшафт", description: "Тихая прогулочная территория с деревьями, скамейками и малыми формами.", area: garden, points: 12 },
+        { id: "o-water", name: "Отражающий двор", tag: "Ландшафт", description: "Правая общественная зона с водой и спокойной визуальной композицией.", area: waterCourt, points: 12 },
+        { id: "o-amphitheater", name: "Амфитеатр", tag: "События", description: "Открытая площадка для студенческих выступлений и встреч на кампусе.", area: amphitheater, points: 14 },
+        { id: "o-sports", name: "Спортивный deck", tag: "Активность", description: "Нижняя активная зона проекта для спорта и движения студентов.", area: sportsDeck, points: 14 }
+    ];
+
+    const npcs = [
+        { id: "co-guide", name: "Алина", role: "студент-амбассадор", tag: "Персонаж кампуса", description: "Она встречает гостей и помогает с навигацией по наружному маршруту.", dialogue: "Привет. Сначала изучи площадь и бульвар, а потом заходи в атриум. Так тур читается намного лучше.", x: frontPlaza.x + 98 * s, y: frontPlaza.y + 60 * s, scale: 1, points: 8, talkPoints: 6, palette: { shirt: "#2e69df", pants: "#223a63", accent: "#79f0ca", hair: "#2f2530", skin: "#f0c7a2" } },
+        { id: "co-engineer", name: "Максим", role: "куратор павильона", tag: "Персонаж кампуса", description: "Он рассказывает о макетах, прототипах и инженерных проектах студентов.", dialogue: "Наши проекты всегда показывают в связке с реальной средой кампуса. Обрати внимание, как павильон связан с площадью.", x: westWing.x - 40 * s, y: westWing.y + 54 * s, scale: 0.98, points: 8, talkPoints: 6, palette: { shirt: "#4b7fef", pants: "#374f7e", accent: "#ffd36e", hair: "#3b2d24", skin: "#edc29a" } },
+        { id: "co-gardener", name: "Олег", role: "куратор сада", tag: "Персонаж кампуса", description: "Он следит за ландшафтом и объясняет, почему сад работает как тихая пауза маршрута.", dialogue: "Сад нужен не только для красоты. Он даёт передышку перед более шумными точками маршрута.", x: garden.x + 102 * s, y: garden.y + 88 * s, scale: 0.96, points: 8, talkPoints: 6, palette: { shirt: "#3f9b5a", pants: "#335542", accent: "#ffd36e", hair: "#3f3324", skin: "#eec39c" } },
+        { id: "co-coach", name: "Ирина", role: "тренер спортзоны", tag: "Персонаж кампуса", description: "Она показывает активную часть кампуса и рассказывает о студенческом спорте.", dialogue: "Спортзона завершает наружный маршрут. После неё логично вернуться к главному входу и перейти внутрь.", x: sportsDeck.x + sportsDeck.w - 82 * s, y: sportsDeck.y + 56 * s, scale: 1, points: 8, talkPoints: 6, palette: { shirt: "#ff7c67", pants: "#5d3a49", accent: "#79f0ca", hair: "#47352a", skin: "#efc8a8" } }
+    ];
+
+    return { sceneName: "Кампус", s, northBar, westWing, eastWing, atrium, entryZone, frontPlaza, boulevard, garden, waterCourt, amphitheater, sportsDeck, blockers, hotspots, npcs };
+}
+
+function getIndoorLayout(floor = state.floor || 1) {
+    const s = getScale();
+    const centerX = gameCanvas.width / 2;
+    const margin = 72 * s;
+
+    if (floor === 2) {
+        const secondHall = rect(centerX - 230 * s, 44 * s, 460 * s, 70 * s);
+        const programming = rect(margin, 92 * s, 244 * s, 120 * s);
+        const cyber = rect(margin, 238 * s, 244 * s, 118 * s);
+        const media = rect(margin, 382 * s, 244 * s, 118 * s);
+        const science = rect(gameCanvas.width - margin - 244 * s, 92 * s, 244 * s, 120 * s);
+        const physics = rect(gameCanvas.width - margin - 244 * s, 238 * s, 244 * s, 118 * s);
+        const lecture = rect(gameCanvas.width - margin - 244 * s, 382 * s, 244 * s, 118 * s);
+        const balcony = rect(centerX - 150 * s, 132 * s, 300 * s, 212 * s);
+        const projectHall = rect(centerX - 200 * s, 372 * s, 400 * s, 96 * s);
+        const teachers = rect(centerX - 220 * s, gameCanvas.height - 168 * s, 200 * s, 104 * s);
+        const meeting = rect(centerX + 20 * s, gameCanvas.height - 168 * s, 200 * s, 104 * s);
+        const downZone = rect(centerX - 70 * s, gameCanvas.height - 56 * s, 140 * s, 28 * s);
+
+        const rooms = [
+            { area: secondHall, fill: "#d4dce6", label: "Галерея 2 этажа" },
+            { area: programming, fill: "#d9e8f7", label: "Кабинет программирования", desks: [4, 3, "#7d9fc8"] },
+            { area: cyber, fill: "#dce3ef", label: "Кибербезопасность", desks: [4, 2, "#6d839d"] },
+            { area: media, fill: "#e5d7ef", label: "Медиастудия", desks: [3, 2, "#b184bc"] },
+            { area: science, fill: "#e8ead4", label: "Химия и биология", desks: [3, 3, "#a4ad69"] },
+            { area: physics, fill: "#d8e6e9", label: "Физика и электроника", desks: [3, 3, "#7fa0a8"] },
+            { area: lecture, fill: "#e7ded4", label: "Лекторий", desks: [5, 2, "#b68758"] },
+            { area: teachers, fill: "#e6e1d9", label: "Преподавательская", desks: [3, 2, "#a98963"] },
+            { area: meeting, fill: "#dae3df", label: "Переговорная", desks: [2, 2, "#89a692"] }
+        ];
+
+        const hotspots = [
+            { id: "i-floor2-gallery", name: "Галерея второго этажа", tag: "2 этаж", description: "Верхняя галерея связывает учебные кабинеты и даёт быстрый обзор второго уровня.", area: secondHall, points: 14 },
+            { id: "i-floor2-programming", name: "Кабинет программирования", tag: "IT", description: "Аудитория для разработки, интерфейсов, алгоритмов и командных цифровых проектов.", area: programming, points: 16 },
+            { id: "i-floor2-cyber", name: "Кибербезопасность", tag: "IT-безопасность", description: "Кабинет для сетевых стендов, анализа логов и практики защиты инфраструктуры.", area: cyber, points: 16 },
+            { id: "i-floor2-media", name: "Медиастудия", tag: "Медиа", description: "Пространство для записи, монтажа, презентаций и визуального сопровождения проектов.", area: media, points: 16 },
+            { id: "i-floor2-science", name: "Химия и биология", tag: "Наука", description: "Кабинет для опытов, демонстраций и естественно-научных занятий.", area: science, points: 16 },
+            { id: "i-floor2-physics", name: "Физика и электроника", tag: "Инженерия", description: "Учебная зона для схем, измерений, электроники и физических демонстраций.", area: physics, points: 16 },
+            { id: "i-floor2-lecture", name: "Лекторий", tag: "Занятия", description: "Кабинет для лекций, защит проектов и встреч с группами.", area: lecture, points: 14 },
+            { id: "i-floor2-teachers", name: "Преподавательская", tag: "Персонал", description: "Рабочая зона преподавателей и координаторов учебных проектов.", area: teachers, points: 14 },
+            { id: "i-floor2-meeting", name: "Переговорная", tag: "Команды", description: "Небольшой кабинет для консультаций, командных встреч и подготовки защит.", area: meeting, points: 14 }
+        ];
+
+        const npcs = [
+            { id: "ci-programmer", name: "Кирилл", role: "преподаватель программирования", tag: "Персонаж 2 этажа", description: "Он ведёт занятия по разработке и показывает, как устроен IT-блок второго этажа.", dialogue: "Это кабинет программирования. Здесь удобно разбирать код, интерфейсы и командные проекты.", x: programming.x + 58 * s, y: programming.y + 58 * s, scale: 0.98, points: 9, talkPoints: 7, palette: { shirt: "#2c6eea", pants: "#263d63", accent: "#79f0ca", hair: "#2b2531", skin: "#efc6a2" } },
+            { id: "ci-cyber", name: "Полина", role: "наставник кибербезопасности", tag: "Персонаж 2 этажа", description: "Она объясняет сетевые стенды, безопасность и практические задания по защите данных.", dialogue: "В киберлаборатории тренируются защищать сети, находить уязвимости и читать логи.", x: cyber.x + cyber.w - 76 * s, y: cyber.y + 56 * s, scale: 0.98, points: 9, talkPoints: 7, palette: { shirt: "#5967e8", pants: "#2c315b", accent: "#ffd36e", hair: "#3a2a23", skin: "#efc3a0" } },
+            { id: "ci-chemist", name: "Анна", role: "преподаватель естественных наук", tag: "Персонаж 2 этажа", description: "Она показывает кабинеты химии, биологии, физики и демонстрационные установки.", dialogue: "Естественно-научный кабинет показывает, что маршрут не ограничен только IT и медиа.", x: science.x + 54 * s, y: science.y + 60 * s, scale: 0.98, points: 9, talkPoints: 7, palette: { shirt: "#3f9b5a", pants: "#355443", accent: "#ffd36e", hair: "#4a352a", skin: "#f0c7a8" } },
+            { id: "ci-media", name: "Влад", role: "куратор медиастудии", tag: "Персонаж 2 этажа", description: "Он отвечает за запись, монтаж и визуальную упаковку студенческих проектов.", dialogue: "Медиастудия на втором этаже нужна для записи, монтажа и подготовки презентаций.", x: media.x + 68 * s, y: media.y + 56 * s, scale: 0.98, points: 9, talkPoints: 7, palette: { shirt: "#9a63d8", pants: "#483c68", accent: "#79f0ca", hair: "#332637", skin: "#edc29a" } },
+            { id: "ci-curator", name: "Оксана", role: "старший куратор", tag: "Персонаж 2 этажа", description: "Она координирует расписание, консультации и проектные активности преподавателей.", dialogue: "Преподавательская помогает маршруту ощущаться живым: здесь координируют занятия и проекты.", x: teachers.x + teachers.w - 70 * s, y: teachers.y + 50 * s, scale: 0.98, points: 9, talkPoints: 7, palette: { shirt: "#d18443", pants: "#59433a", accent: "#79f0ca", hair: "#40302a", skin: "#f1c8a6" } }
+        ];
+
+        return { sceneName: "Главный корпус, 2 этаж", floor: 2, s, secondHall, programming, cyber, media, science, physics, lecture, balcony, projectHall, teachers, meeting, downZone, rooms, halls: [balcony, projectHall], blockers: [], hotspots, npcs };
+    }
+
+    const conference = rect(centerX - 220 * s, 34 * s, 440 * s, 60 * s);
+    const robotics = rect(margin, 102 * s, 228 * s, 128 * s);
+    const library = rect(gameCanvas.width - margin - 228 * s, 102 * s, 228 * s, 128 * s);
+    const studio = rect(gameCanvas.width - margin - 228 * s, 252 * s, 228 * s, 126 * s);
+    const maker = rect(margin, 252 * s, 228 * s, 126 * s);
+    const atriumHall = rect(centerX - 130 * s, 112 * s, 260 * s, 246 * s);
+    const cowork = rect(centerX - 170 * s, 382 * s, 340 * s, 94 * s);
+    const cafe = rect(centerX - 210 * s, gameCanvas.height - 186 * s, 420 * s, 96 * s);
+    const admissions = rect(margin, gameCanvas.height - 158 * s, 216 * s, 104 * s);
+    const medical = rect(gameCanvas.width - margin - 216 * s, gameCanvas.height - 158 * s, 216 * s, 104 * s);
+    const upZone = rect(centerX + 142 * s, atriumHall.y + atriumHall.h - 72 * s, 94 * s, 56 * s);
+    const exitZone = rect(centerX - 76 * s, gameCanvas.height - 30 * s, 152 * s, 18 * s);
+
+    const rooms = [
+        { area: conference, fill: "#d5dde5", label: "Конференц-галерея" },
+        { area: robotics, fill: "#d5e5f2", label: "Робототехника", desks: [4, 3, "#b68758"] },
+        { area: maker, fill: "#e6ddd1", label: "Maker space", desks: [3, 3, "#b68758"] },
+        { area: library, fill: "#e7e2d6", label: "Цифровая библиотека", desks: [3, 3, "#a98963"] },
+        { area: studio, fill: "#e2d8f1", label: "Дизайн-студия", desks: [4, 2, "#b184bc"] },
+        { area: cafe, fill: "#e8ddd3", label: "Кафе-галерея", desks: [5, 2, "#b68758"] },
+        { area: admissions, fill: "#dbe6ef", label: "Приёмная комиссия", desks: [3, 2, "#8aa0b4"] },
+        { area: medical, fill: "#e3ece8", label: "Медкабинет", desks: [2, 2, "#89a692"] }
+    ];
+
+    const hotspots = [
+        { id: "i-atrium", name: "Центральный атриум", tag: "Центр проекта", description: "Атриум собирает все потоки внутри корпуса и связывает общественные пространства в одну ось.", area: atriumHall, points: 16 },
+        { id: "i-conference", name: "Конференц-галерея", tag: "Внутренний маршрут", description: "Верхняя галерея задаёт торжественное начало внутреннему блоку маршрута.", area: conference, points: 14 },
+        { id: "i-robotics", name: "Лаборатория робототехники", tag: "Лаборатория", description: "Практическая зона для инженерных сборок, прототипов и демонстраций.", area: robotics, points: 16 },
+        { id: "i-library", name: "Цифровая библиотека", tag: "Учёба", description: "Тихое пространство с ресурсами для учёбы и исследования проектов.", area: library, points: 16 },
+        { id: "i-studio", name: "Дизайн-студия", tag: "Креатив", description: "Медиазона для визуальных проектов, графики и презентаций.", area: studio, points: 16 },
+        { id: "i-cafe", name: "Кафе-галерея", tag: "Отдых", description: "Нижняя общественная площадка для отдыха, общения и завершения тура.", area: cafe, points: 16 },
+        { id: "i-admissions", name: "Приёмная комиссия", tag: "Навигация", description: "Кабинет для консультаций, документов, встреч с абитуриентами и старта маршрута.", area: admissions, points: 14 },
+        { id: "i-medical", name: "Медкабинет", tag: "Безопасность", description: "Медицинский кабинет добавляет маршруту реалистичную инфраструктуру колледжа.", area: medical, points: 14 }
+    ];
+
+    const npcs = [
+        { id: "ci-host", name: "Ева", role: "координатор тура", tag: "Персонаж корпуса", description: "Она помогает гостям понять внутренний маршрут и движение по атриуму.", dialogue: "Внутри начни с атриума, а потом переходи в лаборатории и библиотеку. Так пространство раскрывается по логике проекта.", x: atriumHall.x + atriumHall.w / 2 - 10 * s, y: atriumHall.y + 112 * s, scale: 1, points: 9, talkPoints: 7, palette: { shirt: "#2e69df", pants: "#243c66", accent: "#79f0ca", hair: "#2c2332", skin: "#f0c7a4" } },
+        { id: "ci-mentor", name: "Даниил", role: "наставник робототехники", tag: "Персонаж корпуса", description: "Он показывает инженерные установки и рассказывает о практике студентов.", dialogue: "Робототехника у нас всегда рядом с maker space. Это удобно для быстрых переходов от идеи к сборке.", x: robotics.x + 52 * s, y: robotics.y + 56 * s, scale: 0.98, points: 9, talkPoints: 7, palette: { shirt: "#4e7ff1", pants: "#2f4c7b", accent: "#ffd36e", hair: "#3a2a23", skin: "#eec29e" } },
+        { id: "ci-librarian", name: "Мария", role: "библиотекарь", tag: "Персонаж корпуса", description: "Она знакомит с цифровой библиотекой и местами для самостоятельной работы.", dialogue: "Библиотека расположена в тихой части плана, чтобы внутри маршрута был спокойный учебный акцент.", x: library.x + library.w - 76 * s, y: library.y + 54 * s, scale: 0.98, points: 9, talkPoints: 7, palette: { shirt: "#6b63d8", pants: "#463f73", accent: "#79f0ca", hair: "#43312d", skin: "#f2ccb1" } },
+        { id: "ci-barista", name: "Тимур", role: "бариста кафе-галереи", tag: "Персонаж корпуса", description: "Он отвечает за атмосферу общественной зоны в конце маршрута.", dialogue: "Кафе завершает тур мягко. После насыщенных лабораторий здесь удобно остановиться и обсудить впечатления.", x: cafe.x + cafe.w / 2 + 34 * s, y: cafe.y + 40 * s, scale: 0.96, points: 9, talkPoints: 7, palette: { shirt: "#d18443", pants: "#694838", accent: "#79f0ca", hair: "#34271f", skin: "#f1c8a6" } },
+        { id: "ci-advisor", name: "София", role: "специалист приёмной комиссии", tag: "Персонаж корпуса", description: "Она помогает абитуриентам разобраться с направлениями, документами и первым маршрутом.", dialogue: "Приёмная комиссия помогает быстро понять, какие направления подходят именно тебе.", x: admissions.x + 62 * s, y: admissions.y + 48 * s, scale: 0.96, points: 9, talkPoints: 7, palette: { shirt: "#2e69df", pants: "#30415f", accent: "#ffd36e", hair: "#3f302a", skin: "#efc8a8" } },
+        { id: "ci-medic", name: "Никита", role: "фельдшер", tag: "Персонаж корпуса", description: "Он показывает медкабинет и объясняет, как устроена безопасность на маршруте.", dialogue: "Медкабинет нужен не только для справок. Это точка безопасности на большом маршруте.", x: medical.x + medical.w - 76 * s, y: medical.y + 48 * s, scale: 0.96, points: 9, talkPoints: 7, palette: { shirt: "#4aa37e", pants: "#344f49", accent: "#ffffff", hair: "#2f2b28", skin: "#edc29a" } }
+    ];
+
+    return { sceneName: "Главный корпус, 1 этаж", floor: 1, s, conference, robotics, library, studio, maker, atriumHall, cowork, cafe, admissions, medical, upZone, exitZone, rooms, halls: [atriumHall, cowork], blockers: [], hotspots, npcs };
+}
+
+function getLayout() {
+    return state.inside ? getIndoorLayout(state.floor) : getOutdoorLayout();
+}
+
+function placePlayerOutside() {
+    player.x = gameCanvas.width / 2 - player.size / 2;
+    player.y = gameCanvas.height - 76;
+}
+
+function placePlayerInside() {
+    const layout = getIndoorLayout(1);
+    player.x = layout.atriumHall.x + layout.atriumHall.w / 2 - player.size / 2;
+    player.y = layout.atriumHall.y + layout.atriumHall.h - 44 * layout.s;
+}
+
+function playerRect() {
+    return rect(player.x, player.y, player.size, player.size);
+}
+
+function intersects(a, b) {
+    return a.x < b.x + b.w &&
+           a.x + a.w > b.x &&
+           a.y < b.y + b.h &&
+           a.y + a.h > b.y;
+}
+
+function clampPlayer() {
+    player.x = Math.max(0, Math.min(player.x, gameCanvas.width - player.size));
+    player.y = Math.max(0, Math.min(player.y, gameCanvas.height - player.size));
+}
+
+function setTutorialCollapsed(collapsed, auto) {
+    state.tutorialCollapsed = collapsed;
+    state.tutorialAutoCollapsed = state.tutorialAutoCollapsed || auto;
+    setPanelCollapsed(tutorialPanel, tutorialToggle, collapsed);
+}
+
+function setPanelCollapsed(panel, button, collapsed) {
+    panel.classList.toggle("is-collapsed", collapsed);
+    button.textContent = collapsed ? "Открыть" : "Скрыть";
+}
+
+function togglePanel(panel, button) {
+    setPanelCollapsed(panel, button, !panel.classList.contains("is-collapsed"));
+}
+
+function showMessage(text) {
+    state.messageText = text;
+    state.messageTimer = 220;
+}
+
+function indoorLayouts() {
+    return [getIndoorLayout(1), getIndoorLayout(2)];
+}
+
+function totalIndoorHotspots() {
+    return indoorLayouts().reduce((sum, layout) => sum + layout.hotspots.length, 0);
+}
+
+function totalIndoorNpcs() {
+    return indoorLayouts().reduce((sum, layout) => sum + layout.npcs.length, 0);
+}
+
+function countVisitedInLayout(layout) {
+    return layout.hotspots.filter((hotspot) => state.visitedHotspots.has(hotspot.id)).length;
+}
+
+function countSpokenInLayout(layout) {
+    return layout.npcs.filter((npc) => state.spokenNpcs.has(npc.id)).length;
+}
+
+function totalHotspots() {
+    return getOutdoorLayout().hotspots.length + totalIndoorHotspots();
+}
+
+function totalNpcs() {
+    return getOutdoorLayout().npcs.length + totalIndoorNpcs();
+}
+
+function countSetByPrefix(set, prefix) {
+    let count = 0;
+
+    for (const value of set) {
+        if (value.startsWith(prefix)) {
+            count++;
+        }
+    }
+
+    return count;
+}
+
+function movePlayer(layout) {
+    if (state.dialogueOpen || state.locationOpen || state.finishOpen) {
+        return;
+    }
+
+    let dx = 0;
+    let dy = 0;
+
+    if (keys["w"] || keys["arrowup"] || keys["ц"]) dy -= 1;
+    if (keys["s"] || keys["arrowdown"] || keys["ы"]) dy += 1;
+    if (keys["a"] || keys["arrowleft"] || keys["ф"]) dx -= 1;
+    if (keys["d"] || keys["arrowright"] || keys["в"]) dx += 1;
+    dx += state.mobileSliderX;
+
+    if (!dx && !dy) {
+        return;
+    }
+
+    const len = Math.hypot(dx, dy) || 1;
+    const speedFactor = Math.min(1, len);
+    const stepX = (dx / len) * player.speed * speedFactor;
+    const stepY = (dy / len) * player.speed * speedFactor;
+
+    moveAxis(stepX, "x", layout.blockers);
+    moveAxis(stepY, "y", layout.blockers);
+    clampPlayer();
+
+    if (!state.tutorialAutoCollapsed) {
+        setTutorialCollapsed(true, true);
+    }
+}
+
+function moveAxis(delta, axis, blockers) {
+    if (!delta) {
+        return;
+    }
+
+    player[axis] += delta;
+    const current = playerRect();
+
+    for (const blocker of blockers) {
+        if (!intersects(current, blocker)) {
+            continue;
+        }
+
+        if (axis === "x") {
+            player.x = delta > 0 ? blocker.x - player.size : blocker.x + blocker.w;
+            current.x = player.x;
+        } else {
+            player.y = delta > 0 ? blocker.y - player.size : blocker.y + blocker.h;
+            current.y = player.y;
+        }
+    }
+}
+
+function updateInteraction(layout) {
+    const current = playerRect();
+    state.interactionTarget = null;
+
+    if (!state.inside && intersects(current, layout.entryZone)) {
+        state.interactionTarget = { type: "enter", label: "войти в атриум" };
+        return;
+    }
+
+    if (state.inside && layout.upZone && intersects(current, layout.upZone)) {
+        state.interactionTarget = { type: "upstairs", label: "подняться на второй этаж" };
+        return;
+    }
+
+    if (state.inside && layout.downZone && intersects(current, layout.downZone)) {
+        state.interactionTarget = { type: "downstairs", label: "спуститься на первый этаж" };
+        return;
+    }
+
+    if (state.inside && layout.exitZone && intersects(current, layout.exitZone)) {
+        state.interactionTarget = { type: "exit", label: "выйти на кампус" };
+    }
+}
+
+function npcCenter(npc) {
+    const scale = npc.scale || 1;
+    return { x: npc.x + 10 * scale, y: npc.y + 18 * scale };
+}
+
+function areaCenter(area) {
+    return { x: area.x + area.w / 2, y: area.y + area.h / 2 };
+}
+
+function distanceToPlayer(point) {
+    const px = player.x + player.size / 2;
+    const py = player.y + player.size / 2;
+    return Math.hypot(point.x - px, point.y - py);
+}
+
+function nearestTarget(items, getPoint) {
+    let best = null;
+    let bestDistance = Infinity;
+
+    for (const item of items) {
+        const point = getPoint(item);
+        const distance = distanceToPlayer(point);
+
+        if (distance < bestDistance) {
+            best = { item, point, distance };
+            bestDistance = distance;
+        }
+    }
+
+    return best;
+}
+
+function currentObjectiveTarget(layout) {
+    const outsideZones = countSetByPrefix(state.visitedHotspots, "o-");
+    const outdoorTalks = countSetByPrefix(state.spokenNpcs, "co-");
+    const firstFloor = getIndoorLayout(1);
+    const secondFloor = getIndoorLayout(2);
+    const firstFloorZones = countVisitedInLayout(firstFloor);
+    const secondFloorZones = countVisitedInLayout(secondFloor);
+    const firstFloorTalks = countSpokenInLayout(firstFloor);
+    const secondFloorTalks = countSpokenInLayout(secondFloor);
+    const unvisitedHotspots = layout.hotspots.filter((hotspot) => !state.visitedHotspots.has(hotspot.id));
+    const unspokenNpcs = layout.npcs.filter((npc) => !state.spokenNpcs.has(npc.id));
+
+    const nearestHotspot = () => {
+        const target = nearestTarget(unvisitedHotspots, (hotspot) => areaCenter(hotspot.area));
+        return target ? { ...target.point, label: target.item.name, type: "Зона", color: "#ffd36e" } : null;
+    };
+
+    const nearestNpc = () => {
+        const target = nearestTarget(unspokenNpcs, npcCenter);
+        return target ? { ...target.point, label: target.item.name, type: "Разговор", color: "#ff97db" } : null;
+    };
+
+    if (!state.inside && outsideZones < 4) {
+        return nearestHotspot() || nearestNpc();
+    }
+
+    if (!state.inside && outdoorTalks < 2) {
+        return nearestNpc() || nearestHotspot();
+    }
+
+    if (!state.inside) {
+        return { ...areaCenter(layout.entryZone), label: "Вход в корпус", type: "Переход", color: "#79f0ca" };
+    }
+
+    if (state.floor === 1 && firstFloorZones < firstFloor.hotspots.length) {
+        return nearestHotspot() || nearestNpc();
+    }
+
+    if (state.floor === 1 && firstFloorTalks < Math.min(3, firstFloor.npcs.length)) {
+        return nearestNpc() || nearestHotspot();
+    }
+
+    if (state.floor === 1 && secondFloorZones < secondFloor.hotspots.length) {
+        return { ...areaCenter(layout.upZone), label: "Лестница на 2 этаж", type: "Переход", color: "#79f0ca" };
+    }
+
+    if (state.floor === 2 && secondFloorZones < secondFloor.hotspots.length) {
+        return nearestHotspot() || nearestNpc();
+    }
+
+    if (state.floor === 2 && secondFloorTalks < secondFloor.npcs.length) {
+        return nearestNpc() || nearestHotspot();
+    }
+
+    if (state.floor === 2 && countSpokenInLayout(firstFloor) < firstFloor.npcs.length) {
+        return { ...areaCenter(layout.downZone), label: "Лестница на 1 этаж", type: "Переход", color: "#79f0ca" };
+    }
+
+    return nearestHotspot() || nearestNpc();
+}
+
+function updateActiveNpc(layout) {
+    const px = player.x + player.size / 2;
+    const py = player.y + player.size / 2;
+    let best = null;
+    let bestDistance = Infinity;
+
+    for (const npc of layout.npcs) {
+        const center = npcCenter(npc);
+        const distance = Math.hypot(center.x - px, center.y - py);
+        const threshold = 34 * layout.s;
+
+        if (distance <= threshold && distance < bestDistance) {
+            best = npc;
+            bestDistance = distance;
+        }
+    }
+
+    state.activeNpc = best;
+
+    if (!best) {
+        if (state.dialogueOpen) {
+            const currentId = state.dialogueNpcId;
+            if (!layout.npcs.some((npc) => npc.id === currentId)) {
+                closeDialogue();
+            }
+        }
+        return;
+    }
+
+    if (!state.foundNpcs.has(best.id)) {
+        state.foundNpcs.add(best.id);
+        state.score += best.points;
+        showMessage(`Найден персонаж: ${best.name}. +${best.points} баллов.`);
+    }
+
+    if (state.dialogueOpen && state.dialogueNpcId !== best.id) {
+        closeDialogue();
+    }
+}
+
+function updateActiveHotspot(layout) {
+    const current = playerRect();
+    state.activeHotspot = null;
+
+    for (const hotspot of layout.hotspots) {
+        if (!intersects(current, hotspot.area)) {
+            continue;
+        }
+
+        state.activeHotspot = hotspot;
+
+        if (!state.visitedHotspots.has(hotspot.id)) {
+            state.visitedHotspots.add(hotspot.id);
+            state.score += hotspot.points;
+            showMessage(`Изучена зона: ${hotspot.name}. +${hotspot.points} баллов.`);
+        }
+
+        break;
+    }
+}
+
+function dialogueLinesFor(npc) {
+    return dialogueScripts[npc.id] || [npc.dialogue];
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function safeColor(value, fallback) {
+    return /^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(String(value || "")) ? value : fallback;
+}
+
+function initialsFor(name) {
+    return String(name || "?")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0])
+        .join("")
+        .toUpperCase();
+}
+
+function portraitProfileFor(npc) {
+    const profiles = {
+        "co-guide": { hair: "bob", mouth: "smile", accessory: "pin" },
+        "co-engineer": { hair: "short", mouth: "confident", accessory: "glasses" },
+        "co-gardener": { hair: "cap", mouth: "calm", accessory: "leaf" },
+        "co-coach": { hair: "ponytail", mouth: "smile", accessory: "whistle" },
+        "ci-host": { hair: "bob", mouth: "smile", accessory: "badge" },
+        "ci-mentor": { hair: "short", mouth: "confident", accessory: "glasses" },
+        "ci-librarian": { hair: "long", mouth: "calm", accessory: "book" },
+        "ci-barista": { hair: "cap", mouth: "smile", accessory: "cup" },
+        "ci-advisor": { hair: "bob", mouth: "smile", accessory: "badge" },
+        "ci-medic": { hair: "short", mouth: "calm", accessory: "pin" },
+        "ci-programmer": { hair: "short", mouth: "confident", accessory: "glasses" },
+        "ci-cyber": { hair: "bob", mouth: "confident", accessory: "glasses" },
+        "ci-chemist": { hair: "long", mouth: "calm", accessory: "leaf" },
+        "ci-media": { hair: "cap", mouth: "smile", accessory: "cup" },
+        "ci-curator": { hair: "bob", mouth: "smile", accessory: "book" }
+    };
+
+    return profiles[npc.id] || { hair: "short", mouth: "smile", accessory: "pin" };
+}
+
+function portraitHair(profile, hair) {
+    if (profile.hair === "long") {
+        return `
+            <path d="M45 99 C36 62 56 33 90 32 C125 32 143 63 134 101 C131 117 125 137 115 151 L65 151 C55 137 48 117 45 99Z" fill="${hair}"/>
+            <path d="M52 83 C61 48 83 40 110 45 C100 62 79 66 58 66 C55 72 53 78 52 83Z" fill="rgba(255,255,255,.12)"/>
+        `;
+    }
+
+    if (profile.hair === "bob") {
+        return `
+            <path d="M49 96 C42 61 61 37 90 36 C119 37 138 61 131 96 L125 124 C111 112 68 112 55 124Z" fill="${hair}"/>
+            <path d="M55 73 C66 49 92 42 119 51 C111 66 86 71 58 69Z" fill="rgba(255,255,255,.13)"/>
+        `;
+    }
+
+    if (profile.hair === "ponytail") {
+        return `
+            <path d="M48 92 C44 58 63 36 91 36 C119 37 135 58 132 91 C144 92 150 105 146 119 C140 112 130 109 123 113 L56 114 C49 108 39 111 34 119 C31 105 37 93 48 92Z" fill="${hair}"/>
+            <path d="M58 70 C70 48 92 42 118 52 C107 65 83 70 58 70Z" fill="rgba(255,255,255,.12)"/>
+        `;
+    }
+
+    if (profile.hair === "cap") {
+        return `
+            <path d="M53 77 C58 52 74 39 92 39 C111 39 126 52 130 77 C110 68 75 68 53 77Z" fill="${hair}"/>
+            <path d="M48 76 C70 68 112 68 136 78 C123 88 63 88 48 76Z" fill="${hair}" opacity=".9"/>
+            <path d="M66 51 C80 43 102 43 117 52" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="4" stroke-linecap="round"/>
+        `;
+    }
+
+    return `
+        <path d="M52 82 C54 53 70 38 91 38 C113 38 128 53 130 82 C112 71 75 71 52 82Z" fill="${hair}"/>
+        <path d="M58 66 C72 47 100 42 123 55 C111 65 84 70 58 66Z" fill="rgba(255,255,255,.13)"/>
+    `;
+}
+
+function portraitFrontHair(profile, hair) {
+    if (profile.hair === "long") {
+        return `
+            <path d="M56 91 C58 58 72 43 93 43 C116 43 128 58 130 93 C119 82 103 76 87 78 C73 79 62 84 56 91Z" fill="${hair}"/>
+            <path d="M58 91 C67 66 88 57 121 62 C111 79 84 88 58 91Z" fill="${hair}"/>
+            <path d="M55 91 C47 109 48 137 63 154 C58 136 60 113 66 94Z" fill="${hair}"/>
+            <path d="M124 91 C134 110 132 138 117 154 C123 134 121 112 114 94Z" fill="${hair}"/>
+            <path d="M66 74 C78 58 103 54 119 62" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="4" stroke-linecap="round"/>
+        `;
+    }
+
+    if (profile.hair === "bob") {
+        return `
+            <path d="M54 92 C54 58 70 43 91 43 C113 43 128 58 129 92 C113 79 92 75 70 84 C64 86 58 89 54 92Z" fill="${hair}"/>
+            <path d="M57 91 C70 62 98 55 126 66 C113 82 84 92 57 91Z" fill="${hair}"/>
+            <path d="M52 88 C44 106 47 130 57 146 C60 127 61 105 68 91Z" fill="${hair}"/>
+            <path d="M128 88 C136 107 133 130 123 146 C120 127 119 105 112 91Z" fill="${hair}"/>
+            <path d="M66 73 C82 58 104 57 119 66" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="4" stroke-linecap="round"/>
+        `;
+    }
+
+    if (profile.hair === "ponytail") {
+        return `
+            <path d="M54 91 C55 58 72 42 92 43 C115 43 129 59 130 91 C114 79 92 76 70 84 C64 86 58 89 54 91Z" fill="${hair}"/>
+            <path d="M58 90 C72 63 101 56 124 68 C111 82 84 91 58 90Z" fill="${hair}"/>
+            <path d="M126 88 C145 87 154 102 151 119 C144 108 134 103 122 106Z" fill="${hair}"/>
+            <path d="M65 72 C80 58 105 56 120 66" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="4" stroke-linecap="round"/>
+        `;
+    }
+
+    if (profile.hair === "cap") {
+        return `
+            <path d="M53 77 C61 53 76 43 93 43 C111 43 125 53 130 77 C111 70 73 70 53 77Z" fill="${hair}"/>
+            <path d="M48 78 C70 69 113 69 137 79 C124 89 63 89 48 78Z" fill="${hair}"/>
+            <path d="M57 85 C56 102 59 117 65 128" fill="none" stroke="${hair}" stroke-width="8" stroke-linecap="round"/>
+            <path d="M123 85 C124 102 121 117 115 128" fill="none" stroke="${hair}" stroke-width="8" stroke-linecap="round"/>
+            <path d="M66 56 C80 48 102 48 117 57" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="4" stroke-linecap="round"/>
+        `;
+    }
+
+    return `
+        <path d="M53 89 C55 58 72 42 92 42 C115 42 129 58 131 88 C115 78 94 75 74 82 C65 85 58 88 53 89Z" fill="${hair}"/>
+        <path d="M57 84 C63 58 84 47 107 50 C102 66 82 79 57 84Z" fill="${hair}"/>
+        <path d="M82 51 L72 79 L94 54 L91 82 L112 58 L103 84 L127 70" fill="none" stroke="${hair}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M64 69 C77 55 100 51 117 59" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="4" stroke-linecap="round"/>
+    `;
+}
+
+function portraitAccessory(profile, accent) {
+    if (profile.accessory === "glasses") {
+        return `
+            <circle cx="76" cy="102" r="8" fill="none" stroke="${accent}" stroke-width="3"/>
+            <circle cx="104" cy="102" r="8" fill="none" stroke="${accent}" stroke-width="3"/>
+            <path d="M84 102 L96 102" stroke="${accent}" stroke-width="3" stroke-linecap="round"/>
+        `;
+    }
+
+    if (profile.accessory === "leaf") {
+        return `<path d="M116 172 C129 155 144 157 151 164 C139 166 130 173 124 185 C122 180 119 176 116 172Z" fill="#78d879"/>`;
+    }
+
+    if (profile.accessory === "whistle") {
+        return `<path d="M112 171 L132 181" stroke="${accent}" stroke-width="4" stroke-linecap="round"/><circle cx="136" cy="183" r="7" fill="${accent}"/>`;
+    }
+
+    if (profile.accessory === "book") {
+        return `<path d="M116 166 L145 158 L145 187 L116 195Z" fill="#e8ddc6"/><path d="M116 166 L116 195" stroke="#9b7a56" stroke-width="3"/>`;
+    }
+
+    if (profile.accessory === "cup") {
+        return `<path d="M124 164 H146 L142 193 H128Z" fill="#f6dfba"/><path d="M145 172 C158 172 158 187 144 187" fill="none" stroke="#f6dfba" stroke-width="5"/>`;
+    }
+
+    return `<circle cx="122" cy="164" r="9" fill="${accent}"/><path d="M118 164 L122 168 L129 158" fill="none" stroke="#06111f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+}
+
+function portraitMouth(profile) {
+    if (profile.mouth === "confident") {
+        return `<path d="M80 126 C88 131 99 131 108 126" fill="none" stroke="#8f4d42" stroke-width="3" stroke-linecap="round"/>`;
+    }
+
+    if (profile.mouth === "calm") {
+        return `<path d="M82 127 C89 130 98 130 105 127" fill="none" stroke="#8f4d42" stroke-width="3" stroke-linecap="round"/>`;
+    }
+
+    return `<path d="M79 124 C86 134 101 134 109 124" fill="none" stroke="#8f4d42" stroke-width="3.4" stroke-linecap="round"/>`;
+}
+
+function renderPortraitSvg(npc, palette) {
+    const id = String(npc.id || "npc").replace(/[^a-z0-9_-]/gi, "");
+    const profile = portraitProfileFor(npc);
+    const name = escapeHtml(npc.name || "Персонаж");
+    const role = escapeHtml(npc.role || npc.tag || "NPC");
+    const initials = escapeHtml(initialsFor(npc.name));
+
+    return `
+        <span class="portrait-orbit"></span>
+        <span class="portrait-spark portrait-spark--one"></span>
+        <span class="portrait-spark portrait-spark--two"></span>
+        <svg class="portrait-svg" viewBox="0 0 180 220" aria-hidden="true" focusable="false">
+            <defs>
+                <linearGradient id="portrait-shirt-${id}" x1="52" y1="152" x2="132" y2="205" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stop-color="${palette.accent}"/>
+                    <stop offset="0.22" stop-color="${palette.shirt}"/>
+                    <stop offset="1" stop-color="${palette.pants}"/>
+                </linearGradient>
+                <linearGradient id="portrait-face-${id}" x1="70" y1="62" x2="112" y2="142" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stop-color="${palette.skin}"/>
+                    <stop offset="1" stop-color="#d99c78"/>
+                </linearGradient>
+                <filter id="portrait-shadow-${id}" x="-30%" y="-30%" width="160%" height="160%">
+                    <feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#000000" flood-opacity="0.35"/>
+                </filter>
+            </defs>
+            <g filter="url(#portrait-shadow-${id})">
+                <ellipse cx="90" cy="202" rx="55" ry="10" fill="rgba(0,0,0,.28)"/>
+                <path d="M39 205 C45 170 64 151 90 151 C116 151 135 170 141 205Z" fill="url(#portrait-shirt-${id})"/>
+                <path d="M61 172 C75 184 105 184 120 172 L126 205 H54Z" fill="rgba(0,0,0,.16)"/>
+                <path d="M73 143 C76 160 104 160 107 143 L107 168 C96 178 84 178 73 168Z" fill="${palette.skin}"/>
+                <ellipse cx="60" cy="102" rx="9" ry="13" fill="${palette.skin}"/>
+                <ellipse cx="120" cy="102" rx="9" ry="13" fill="${palette.skin}"/>
+                ${portraitHair(profile, palette.hair)}
+                <path d="M58 91 C58 60 72 45 91 45 C110 45 123 60 123 91 L119 118 C116 142 102 153 90 153 C78 153 64 142 61 118Z" fill="url(#portrait-face-${id})"/>
+                <path d="M63 89 C71 78 83 73 98 73 C89 84 73 90 63 89Z" fill="rgba(255,255,255,.16)"/>
+                <path d="M69 94 C75 90 82 90 87 94" fill="none" stroke="${palette.hair}" stroke-width="3" stroke-linecap="round" opacity=".68"/>
+                <path d="M96 94 C102 90 110 90 115 94" fill="none" stroke="${palette.hair}" stroke-width="3" stroke-linecap="round" opacity=".68"/>
+                <ellipse cx="78" cy="104" rx="4" ry="5" fill="#17263b"/>
+                <ellipse cx="105" cy="104" rx="4" ry="5" fill="#17263b"/>
+                <circle cx="79" cy="102" r="1.4" fill="#ffffff"/>
+                <circle cx="106" cy="102" r="1.4" fill="#ffffff"/>
+                <path d="M91 105 C88 113 87 119 94 120" fill="none" stroke="#b9775f" stroke-width="2.4" stroke-linecap="round"/>
+                ${portraitMouth(profile)}
+                <circle cx="69" cy="119" r="5" fill="rgba(255,130,130,.18)"/>
+                <circle cx="112" cy="119" r="5" fill="rgba(255,130,130,.18)"/>
+                ${portraitFrontHair(profile, palette.hair)}
+                <path d="M64 155 L90 181 L116 155" fill="none" stroke="${palette.accent}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                ${portraitAccessory(profile, palette.accent)}
+                <circle cx="56" cy="168" r="12" fill="rgba(255,255,255,.11)"/>
+                <text x="56" y="173" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="900" fill="#eef5ff">${initials}</text>
+            </g>
+        </svg>
+        <div class="portrait-nameplate"><span>${initials}</span>${role}</div>
+    `;
+}
+
+function setDialoguePortrait(npc) {
+    const palette = npc.palette || {};
+    const portraitPalette = {
+        shirt: safeColor(palette.shirt, "#2e69df"),
+        pants: safeColor(palette.pants, "#243c66"),
+        accent: safeColor(palette.accent, "#79f0ca"),
+        hair: safeColor(palette.hair, "#2f2530"),
+        skin: safeColor(palette.skin, "#f0c7a2")
+    };
+
+    dialoguePortrait.style.setProperty("--portrait-shirt", portraitPalette.shirt);
+    dialoguePortrait.style.setProperty("--portrait-accent", portraitPalette.accent);
+    dialoguePortrait.style.setProperty("--portrait-hair", portraitPalette.hair);
+    dialoguePortrait.style.setProperty("--portrait-skin", portraitPalette.skin);
+    dialoguePortrait.innerHTML = renderPortraitSvg(npc, portraitPalette);
+}
+
+function updateDialogueControls(lines, index, revealed) {
+    dialogueProgress.textContent = `Реплика ${index + 1} / ${lines.length}`;
+
+    if (!revealed) {
+        dialogueChoice.textContent = "Твой ответ: внимательно слушать";
+        dialogueTip.textContent = "Нажми E, Enter или кнопку, чтобы сразу показать реплику полностью.";
+        dialogueNext.textContent = "Показать текст";
+        return;
+    }
+
+    const lastLine = index >= lines.length - 1;
+    dialogueChoice.textContent = lastLine
+        ? "Твой ответ: Спасибо, я продолжу маршрут"
+        : "Твой ответ: Расскажи подробнее";
+    dialogueTip.textContent = lastLine
+        ? "Нажми E, Enter или кнопку, чтобы закрыть диалог."
+        : "Нажми E, Enter или кнопку, чтобы продолжить разговор.";
+    dialogueNext.textContent = lastLine ? "Закрыть" : "Дальше";
+}
+
+function revealDialogueText(npc) {
+    const lines = dialogueLinesFor(npc);
+    const index = Math.min(state.dialogueIndex, lines.length - 1);
+
+    state.dialogueReveal = state.dialogueTextFull.length;
+    dialogueText.textContent = state.dialogueTextFull;
+    updateDialogueControls(lines, index, true);
+}
+
+function updateDialogueReveal() {
+    if (!state.dialogueOpen || state.dialogueReveal >= state.dialogueTextFull.length) {
+        return;
+    }
+
+    state.dialogueReveal = Math.min(state.dialogueTextFull.length, state.dialogueReveal + 2);
+    dialogueText.textContent = state.dialogueTextFull.slice(0, state.dialogueReveal);
+
+    if (state.dialogueReveal < state.dialogueTextFull.length) {
+        return;
+    }
+
+    const layout = getLayout();
+    const npc = layout.npcs.find((item) => item.id === state.dialogueNpcId);
+
+    if (npc) {
+        const lines = dialogueLinesFor(npc);
+        const index = Math.min(state.dialogueIndex, lines.length - 1);
+        updateDialogueControls(lines, index, true);
+    }
+}
+
+function renderDialogueLine(npc) {
+    const lines = dialogueLinesFor(npc);
+    const index = Math.min(state.dialogueIndex, lines.length - 1);
+
+    state.dialogueTextFull = lines[index];
+    state.dialogueReveal = 0;
+    dialogueText.textContent = "";
+    updateDialogueControls(lines, index, false);
+}
+
+function openDialogue(npc) {
+    state.dialogueOpen = true;
+    state.dialogueNpcId = npc.id;
+    state.dialogueIndex = 0;
+    dialoguePanel.classList.add("is-open");
+    dialoguePanel.setAttribute("aria-hidden", "false");
+    dialogueName.textContent = npc.name;
+    dialogueRole.textContent = npc.role;
+    setDialoguePortrait(npc);
+    renderDialogueLine(npc);
+
+    if (!state.spokenNpcs.has(npc.id)) {
+        state.spokenNpcs.add(npc.id);
+        state.score += npc.talkPoints;
+        showMessage(`Диалог с ${npc.name}. +${npc.talkPoints} баллов.`);
+    }
+}
+
+function advanceDialogue() {
+    const layout = getLayout();
+    const npc = layout.npcs.find((item) => item.id === state.dialogueNpcId);
+
+    if (!npc) {
+        closeDialogue();
+        return;
+    }
+
+    const lines = dialogueLinesFor(npc);
+
+    if (state.dialogueReveal < state.dialogueTextFull.length) {
+        revealDialogueText(npc);
+        return;
+    }
+
+    if (state.dialogueIndex < lines.length - 1) {
+        state.dialogueIndex++;
+        renderDialogueLine(npc);
+        return;
+    }
+
+    closeDialogue();
+}
+
+function closeDialogue() {
+    state.dialogueOpen = false;
+    state.dialogueNpcId = "";
+    state.dialogueIndex = 0;
+    state.dialogueTextFull = "";
+    state.dialogueReveal = 0;
+    dialoguePanel.classList.remove("is-open");
+    dialoguePanel.setAttribute("aria-hidden", "true");
+}
+
+function openPlace(hotspot) {
+    state.locationOpen = true;
+    state.locationHotspotId = hotspot.id;
+    placePanel.classList.add("is-open");
+    placePanel.setAttribute("aria-hidden", "false");
+    placeTitle.textContent = hotspot.name;
+    placeTag.textContent = hotspot.tag;
+    placeText.textContent = hotspot.description;
+
+    if (!state.inspectedHotspots.has(hotspot.id)) {
+        state.inspectedHotspots.add(hotspot.id);
+        state.score += 4;
+        showMessage(`Описание места: ${hotspot.name}. +4 балла.`);
+    }
+}
+
+function closePlace() {
+    state.locationOpen = false;
+    state.locationHotspotId = "";
+    placePanel.classList.remove("is-open");
+    placePanel.setAttribute("aria-hidden", "true");
+}
+
+function consumeAction() {
+    const queued = state.actionQueued;
+    state.actionQueued = false;
+    return queued;
+}
+
+function handleAction() {
+    if (!consumeAction()) {
+        return;
+    }
+
+    if (state.finishOpen) {
+        state.finishOpen = false;
+        finishOverlay.classList.remove("is-open");
+        return;
+    }
+
+    if (state.locationOpen) {
+        closePlace();
+        return;
+    }
+
+    if (state.dialogueOpen) {
+        advanceDialogue();
+        return;
+    }
+
+    if (state.interactionTarget) {
+        if (state.interactionTarget.type === "enter") {
+            state.inside = true;
+            state.floor = 1;
+            placePlayerInside();
+            showMessage("Открыт внутренний маршрут корпуса.");
+        } else if (state.interactionTarget.type === "upstairs") {
+            state.floor = 2;
+            const second = getIndoorLayout(2);
+            player.x = second.downZone.x + second.downZone.w / 2 - player.size / 2;
+            player.y = second.downZone.y - 42 * second.s;
+            clampPlayer();
+            showMessage("Ты поднялся на второй этаж. Открыты новые кабинеты и персонажи.");
+        } else if (state.interactionTarget.type === "downstairs") {
+            state.floor = 1;
+            const first = getIndoorLayout(1);
+            player.x = first.upZone.x + first.upZone.w / 2 - player.size / 2;
+            player.y = first.upZone.y + first.upZone.h + 18 * first.s;
+            clampPlayer();
+            showMessage("Ты вернулся на первый этаж.");
+        } else {
+            state.inside = false;
+            state.floor = 1;
+            const outdoor = getOutdoorLayout();
+            player.x = outdoor.entryZone.x + outdoor.entryZone.w / 2 - player.size / 2;
+            player.y = outdoor.entryZone.y + 46 * outdoor.s;
+            clampPlayer();
+            showMessage("Ты вернулся на кампус.");
+        }
+        return;
+    }
+
+    if (state.activeNpc) {
+        openDialogue(state.activeNpc);
+        return;
+    }
+
+    if (state.activeHotspot) {
+        openPlace(state.activeHotspot);
+    }
+}
+
+function isTourComplete() {
+    return state.visitedHotspots.size === totalHotspots() &&
+           state.foundNpcs.size === totalNpcs() &&
+           state.spokenNpcs.size === totalNpcs();
+}
+
+function maybeShowFinish() {
+    if (state.finishShown || !isTourComplete()) {
+        return;
+    }
+
+    closeDialogue();
+    state.finishShown = true;
+    state.finishOpen = true;
+    finishOverlay.classList.add("is-open");
+    finishText.textContent = "Ты собрал весь маршрут: изучил все ключевые зоны, нашёл всех персонажей и поговорил с людьми колледжа.";
+    finishStats.innerHTML = `
+        <div class="finish-stat"><strong>Изучено зон</strong>${state.visitedHotspots.size} / ${totalHotspots()}</div>
+        <div class="finish-stat"><strong>Найдено персонажей</strong>${state.foundNpcs.size} / ${totalNpcs()}</div>
+        <div class="finish-stat"><strong>Проведено диалогов</strong>${state.spokenNpcs.size}</div>
+        <div class="finish-stat"><strong>Итоговые баллы</strong>${state.score}</div>
+    `;
+}
+
+function taskData() {
+    const outsideZones = countSetByPrefix(state.visitedHotspots, "o-");
+    const outdoorTalks = countSetByPrefix(state.spokenNpcs, "co-");
+    const firstFloor = getIndoorLayout(1);
+    const secondFloor = getIndoorLayout(2);
+    const firstFloorZones = countVisitedInLayout(firstFloor);
+    const secondFloorZones = countVisitedInLayout(secondFloor);
+    const indoorZones = firstFloorZones + secondFloorZones;
+    const indoorTalks = countSetByPrefix(state.spokenNpcs, "ci-");
+
+    return [
+        { title: "Изучить 4 уличные зоны", done: outsideZones >= 4, meta: `${Math.min(outsideZones, 4)} / 4` },
+        { title: "Поговорить с 2 людьми на кампусе", done: outdoorTalks >= 2, meta: `${Math.min(outdoorTalks, 2)} / 2` },
+        { title: "Войти в главный корпус", done: state.inside || indoorZones > 0, meta: state.inside || indoorZones > 0 ? "выполнено" : "нужно подойти ко входу" },
+        { title: "Изучить кабинеты 1 этажа", done: firstFloorZones >= firstFloor.hotspots.length, meta: `${firstFloorZones} / ${firstFloor.hotspots.length}` },
+        { title: "Подняться на второй этаж", done: state.floor === 2 || secondFloorZones > 0, meta: state.floor === 2 || secondFloorZones > 0 ? "этаж открыт" : "найди лестницу в атриуме" },
+        { title: "Изучить кабинеты 2 этажа", done: secondFloorZones >= secondFloor.hotspots.length, meta: `${secondFloorZones} / ${secondFloor.hotspots.length}` },
+        { title: "Поговорить с людьми внутри", done: indoorTalks >= totalIndoorNpcs(), meta: `${indoorTalks} / ${totalIndoorNpcs()}` },
+        { title: "Закрыть полный тур", done: isTourComplete(), meta: `${state.visitedHotspots.size}/${totalHotspots()} зон, ${state.foundNpcs.size}/${totalNpcs()} людей` }
+    ];
+}
+
+function missionText() {
+    const outsideZones = countSetByPrefix(state.visitedHotspots, "o-");
+    const outdoorTalks = countSetByPrefix(state.spokenNpcs, "co-");
+    const firstFloor = getIndoorLayout(1);
+    const secondFloor = getIndoorLayout(2);
+    const firstFloorZones = countVisitedInLayout(firstFloor);
+    const secondFloorZones = countVisitedInLayout(secondFloor);
+    const indoorTalks = countSetByPrefix(state.spokenNpcs, "ci-");
+
+    if (!state.inside && outsideZones < 4) {
+        return "Осмотреть наружный маршрут";
+    }
+
+    if (!state.inside && outdoorTalks < 2) {
+        return "Поговорить с людьми на кампусе";
+    }
+
+    if (!state.inside) {
+        return "Подойти ко входу и перейти внутрь";
+    }
+
+    if (state.floor === 2 && secondFloorZones < secondFloor.hotspots.length) {
+        return "Изучить кабинеты второго этажа";
+    }
+
+    if (firstFloorZones < firstFloor.hotspots.length) {
+        return "Изучить кабинеты первого этажа";
+    }
+
+    if (state.floor === 1 && secondFloorZones === 0) {
+        return "Найти лестницу и подняться на второй этаж";
+    }
+
+    if (secondFloorZones < secondFloor.hotspots.length) {
+        return "Вернуться на второй этаж и закрыть кабинеты";
+    }
+
+    if (indoorTalks < totalIndoorNpcs()) {
+        return "Поговорить со всеми людьми внутри корпуса";
+    }
+
+    return "Завершить полный тур колледжа";
+}
+
+function tutorialStepText() {
+    const outsideZones = countSetByPrefix(state.visitedHotspots, "o-");
+    const outdoorTalks = countSetByPrefix(state.spokenNpcs, "co-");
+    const firstFloor = getIndoorLayout(1);
+    const secondFloor = getIndoorLayout(2);
+    const firstFloorZones = countVisitedInLayout(firstFloor);
+    const secondFloorZones = countVisitedInLayout(secondFloor);
+
+    if (!state.inside && outsideZones < 3) {
+        return "Шаг 1. Осмотри уличные зоны нового кампуса.";
+    }
+
+    if (!state.inside && outdoorTalks < 2) {
+        return "Шаг 2. Найди людей кампуса и поговори с ними по клавише E.";
+    }
+
+    if (!state.inside) {
+        return "Шаг 3. Подойди ко входу и нажми E для перехода в атриум.";
+    }
+
+    if (firstFloorZones < firstFloor.hotspots.length) {
+        return "Шаг 4. Изучи кабинеты первого этажа и найди лестницу.";
+    }
+
+    if (secondFloorZones < secondFloor.hotspots.length) {
+        return "Шаг 5. Поднимись на второй этаж и изучи новые кабинеты.";
+    }
+
+    return "Шаг 6. Поговори со всеми персонажами и заверши полный маршрут.";
+}
+
+function currentHint() {
+    if (state.finishOpen) {
+        return "Тур завершён. Можно закрыть экран или начать заново.";
+    }
+
+    if (state.dialogueOpen) {
+        return "Диалог открыт по центру экрана. Нажми E, Enter или кнопку, чтобы читать дальше.";
+    }
+
+    if (state.interactionTarget) {
+        return `Нажми E или Enter, чтобы ${state.interactionTarget.label}.`;
+    }
+
+    if (state.activeNpc) {
+        return `Рядом ${state.activeNpc.name}, ${state.activeNpc.role}. Нажми E для разговора.`;
+    }
+
+    if (state.activeHotspot) {
+        return `Изучается зона: ${state.activeHotspot.name}.`;
+    }
+
+    const objective = currentObjectiveTarget(getLayout());
+
+    if (objective) {
+        return `Следуй за стрелкой цели: ${objective.type.toLowerCase()} "${objective.label}".`;
+    }
+
+    return state.inside
+        ? "Внутри корпуса двигайся стрелками, WASD, D-pad или нижним ползунком: изучи 1 этаж, найди лестницу и поднимись выше."
+        : "На улице используй стрелки, WASD, D-pad или нижний ползунок: площадь, бульвар, сад, амфитеатр и спортзона.";
+}
+
+function updateUi() {
+    updateDialogueReveal();
+
+    const activeNpc = state.activeNpc;
+    const activeHotspot = state.activeHotspot;
+    const routePercent = Math.round((state.visitedHotspots.size / totalHotspots()) * 100);
+
+    sceneLabel.textContent = state.inside ? `Главный корпус, ${state.floor} этаж` : "Кампус";
+    zoneLabel.textContent = activeNpc ? activeNpc.name : activeHotspot ? activeHotspot.name : state.inside ? state.floor === 2 ? "Галерея 2 этажа" : "Атриум" : "Стартовая площадь";
+    routeLabel.textContent = `${state.visitedHotspots.size} / ${totalHotspots()}`;
+    npcLabel.textContent = `${state.foundNpcs.size} / ${totalNpcs()}`;
+    talkLabel.textContent = `${state.spokenNpcs.size} / ${totalNpcs()}`;
+    scoreLabel.textContent = String(state.score);
+    missionLabel.textContent = missionText();
+    tutorialSummary.textContent = tutorialStepText();
+    progressBar.style.width = `${routePercent}%`;
+    hintLabel.textContent = currentHint();
+
+    if (activeNpc) {
+        detailTitle.textContent = activeNpc.name;
+        detailText.textContent = `${activeNpc.role}. ${activeNpc.description}`;
+        detailTag.textContent = activeNpc.tag;
+    } else if (activeHotspot) {
+        detailTitle.textContent = activeHotspot.name;
+        detailText.textContent = activeHotspot.description;
+        detailTag.textContent = activeHotspot.tag;
+    } else {
+        detailTitle.textContent = "Новый проект";
+        detailText.textContent = "Маршрут теперь включает уличные зоны, первый этаж, второй этаж, новые кабинеты, персонажей и лестничный переход.";
+        detailTag.textContent = "Концепция: кампус + 2 этажа";
+    }
+
+    questList.innerHTML = taskData().map((task) => `
+        <div class="quest-item ${task.done ? "is-done" : ""}">
+            <div class="quest-title">${task.done ? "[OK]" : "[ ]"} ${task.title}</div>
+            <div class="quest-meta">${task.meta}</div>
+        </div>
+    `).join("");
+
+    if (state.messageTimer > 0) {
+        state.messageTimer--;
+        messageBanner.classList.add("is-visible");
+        messageBanner.textContent = state.messageText;
+    } else {
+        messageBanner.classList.remove("is-visible");
+    }
+}
+
+function drawTree(ctx, x, y, size) {
+    ctx.fillStyle = "#7a5834";
+    ctx.fillRect(x - size * 0.12, y + size * 0.14, size * 0.24, size * 0.42);
+    ctx.fillStyle = "#29b657";
+    ctx.beginPath();
+    ctx.arc(x, y, size * 0.46, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#4ad86d";
+    ctx.beginPath();
+    ctx.arc(x - size * 0.12, y - size * 0.12, size * 0.22, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+function drawBench(ctx, x, y, width) {
+    ctx.fillStyle = "#6a492d";
+    ctx.fillRect(x, y, width, 5);
+    ctx.fillRect(x, y + 7, width, 5);
+    ctx.fillRect(x + 4, y + 12, 4, 8);
+    ctx.fillRect(x + width - 8, y + 12, 4, 8);
+}
+
+function drawMarker(ctx, hotspot, visited) {
+    const pulse = 1 + Math.sin(state.frame / 18) * 0.08;
+    const x = hotspot.area.x + hotspot.area.w / 2;
+    const y = hotspot.area.y + hotspot.area.h / 2;
+    const radius = Math.max(12, Math.min(hotspot.area.w, hotspot.area.h) * 0.16) * pulse;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = visited ? "rgba(121, 240, 202, 0.16)" : "rgba(255, 211, 110, 0.16)";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x, y, radius * 0.66, 0, Math.PI * 2);
+    ctx.fillStyle = visited ? "#79f0ca" : "#ffd36e";
+    ctx.fill();
+}
+
+function drawObjectiveBeacon(layout) {
+    if (state.dialogueOpen || state.locationOpen || state.finishOpen) {
+        return;
+    }
+
+    const target = currentObjectiveTarget(layout);
+
+    if (!target) {
+        return;
+    }
+
+    const px = player.x + player.size / 2;
+    const py = player.y + player.size / 2;
+    const dx = target.x - px;
+    const dy = target.y - py;
+    const distance = Math.hypot(dx, dy) || 1;
+    const angle = Math.atan2(dy, dx);
+    const pulse = 1 + Math.sin(state.frame / 12) * 0.12;
+    const beaconRadius = 18 * pulse;
+    const label = `${target.type}: ${target.label}`;
+
+    gameCtx.save();
+    gameCtx.lineWidth = 2;
+    gameCtx.strokeStyle = target.color;
+    gameCtx.fillStyle = target.color;
+
+    gameCtx.globalAlpha = 0.28;
+    gameCtx.setLineDash([9, 12]);
+    gameCtx.beginPath();
+    gameCtx.moveTo(px, py);
+    gameCtx.lineTo(target.x, target.y);
+    gameCtx.stroke();
+    gameCtx.setLineDash([]);
+
+    gameCtx.globalAlpha = 0.78;
+    gameCtx.beginPath();
+    gameCtx.arc(target.x, target.y, beaconRadius, 0, Math.PI * 2);
+    gameCtx.stroke();
+    gameCtx.globalAlpha = 0.18;
+    gameCtx.beginPath();
+    gameCtx.arc(target.x, target.y, beaconRadius + 11, 0, Math.PI * 2);
+    gameCtx.fill();
+
+    const arrowDistance = Math.min(48, Math.max(34, distance * 0.22));
+    const arrowX = px + Math.cos(angle) * arrowDistance;
+    const arrowY = py + Math.sin(angle) * arrowDistance;
+
+    gameCtx.globalAlpha = 0.96;
+    gameCtx.translate(arrowX, arrowY);
+    gameCtx.rotate(angle);
+    gameCtx.beginPath();
+    gameCtx.moveTo(16, 0);
+    gameCtx.lineTo(-10, -9);
+    gameCtx.lineTo(-5, 0);
+    gameCtx.lineTo(-10, 9);
+    gameCtx.closePath();
+    gameCtx.fill();
+    gameCtx.strokeStyle = "rgba(6, 17, 31, 0.82)";
+    gameCtx.stroke();
+    gameCtx.restore();
+
+    gameCtx.save();
+    gameCtx.font = `${Math.max(12, 14 * layout.s)}px Arial`;
+    const labelWidth = gameCtx.measureText(label).width + 22;
+    const labelX = Math.max(10, Math.min(gameCanvas.width - labelWidth - 10, target.x - labelWidth / 2));
+    const labelY = Math.max(28, target.y - 42 * layout.s);
+    gameCtx.fillStyle = "rgba(6, 14, 28, 0.88)";
+    gameCtx.fillRect(labelX, labelY, labelWidth, 26);
+    gameCtx.strokeStyle = target.color;
+    gameCtx.strokeRect(labelX, labelY, labelWidth, 26);
+    gameCtx.fillStyle = "#eef5ff";
+    gameCtx.fillText(label, labelX + 11, labelY + 18);
+    gameCtx.restore();
+}
+
+function npcIconProfile(npc) {
+    const profiles = {
+        "co-guide": { type: "compass", label: "NAV", color: "#79f0ca" },
+        "co-engineer": { type: "gear", label: "ENG", color: "#ffd36e" },
+        "co-gardener": { type: "leaf", label: "ECO", color: "#7ee08d" },
+        "co-coach": { type: "whistle", label: "FIT", color: "#ff9a7c" },
+        "ci-host": { type: "info", label: "INFO", color: "#79f0ca" },
+        "ci-mentor": { type: "tool", label: "BOT", color: "#ffd36e" },
+        "ci-librarian": { type: "book", label: "LIB", color: "#b9a7ff" },
+        "ci-barista": { type: "cup", label: "CAFE", color: "#f1b36b" },
+        "ci-advisor": { type: "info", label: "ADM", color: "#8ec7ff" },
+        "ci-medic": { type: "leaf", label: "MED", color: "#7ee0bd" },
+        "ci-programmer": { type: "tool", label: "CODE", color: "#79f0ca" },
+        "ci-cyber": { type: "gear", label: "SEC", color: "#ffd36e" },
+        "ci-chemist": { type: "leaf", label: "SCI", color: "#9fe07e" },
+        "ci-media": { type: "cup", label: "MEDIA", color: "#d8a7ff" },
+        "ci-curator": { type: "book", label: "CUR", color: "#f1b36b" }
+    };
+
+    return profiles[npc.id] || { type: "info", label: "NPC", color: "#d86cff" };
+}
+
+function drawRoleSymbol(ctx, type, cx, cy, size, color) {
+    ctx.save();
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = Math.max(1.4, size * 0.13);
+
+    if (type === "compass") {
+        ctx.beginPath();
+        ctx.arc(cx, cy, size * 0.32, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx + size * 0.08, cy - size * 0.34);
+        ctx.lineTo(cx - size * 0.08, cy + size * 0.34);
+        ctx.lineTo(cx + size * 0.28, cy + size * 0.1);
+        ctx.closePath();
+        ctx.fill();
+    } else if (type === "gear") {
+        for (let i = 0; i < 8; i++) {
+            const a = (Math.PI * 2 * i) / 8;
+            ctx.beginPath();
+            ctx.moveTo(cx + Math.cos(a) * size * 0.31, cy + Math.sin(a) * size * 0.31);
+            ctx.lineTo(cx + Math.cos(a) * size * 0.46, cy + Math.sin(a) * size * 0.46);
+            ctx.stroke();
+        }
+        ctx.beginPath();
+        ctx.arc(cx, cy, size * 0.28, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx, cy, size * 0.1, 0, Math.PI * 2);
+        ctx.fill();
+    } else if (type === "leaf") {
+        ctx.beginPath();
+        ctx.moveTo(cx - size * 0.32, cy + size * 0.18);
+        ctx.quadraticCurveTo(cx - size * 0.04, cy - size * 0.46, cx + size * 0.38, cy - size * 0.28);
+        ctx.quadraticCurveTo(cx + size * 0.28, cy + size * 0.24, cx - size * 0.32, cy + size * 0.18);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(6, 17, 31, 0.62)";
+        ctx.beginPath();
+        ctx.moveTo(cx - size * 0.22, cy + size * 0.14);
+        ctx.lineTo(cx + size * 0.18, cy - size * 0.18);
+        ctx.stroke();
+    } else if (type === "whistle") {
+        ctx.beginPath();
+        ctx.arc(cx - size * 0.04, cy, size * 0.26, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx + size * 0.18, cy - size * 0.12);
+        ctx.lineTo(cx + size * 0.46, cy - size * 0.04);
+        ctx.lineTo(cx + size * 0.18, cy + size * 0.12);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx - size * 0.04, cy, size * 0.08, 0, Math.PI * 2);
+        ctx.fill();
+    } else if (type === "tool") {
+        ctx.beginPath();
+        ctx.moveTo(cx - size * 0.3, cy + size * 0.3);
+        ctx.lineTo(cx + size * 0.24, cy - size * 0.24);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx + size * 0.3, cy - size * 0.3, size * 0.16, Math.PI * 0.2, Math.PI * 1.45);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx - size * 0.34, cy + size * 0.34, size * 0.09, 0, Math.PI * 2);
+        ctx.fill();
+    } else if (type === "book") {
+        ctx.beginPath();
+        ctx.rect(cx - size * 0.42, cy - size * 0.28, size * 0.34, size * 0.58);
+        ctx.rect(cx + size * 0.08, cy - size * 0.28, size * 0.34, size * 0.58);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - size * 0.24);
+        ctx.lineTo(cx, cy + size * 0.32);
+        ctx.stroke();
+    } else if (type === "cup") {
+        ctx.beginPath();
+        ctx.moveTo(cx - size * 0.28, cy - size * 0.2);
+        ctx.lineTo(cx + size * 0.28, cy - size * 0.2);
+        ctx.lineTo(cx + size * 0.18, cy + size * 0.34);
+        ctx.lineTo(cx - size * 0.18, cy + size * 0.34);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx + size * 0.34, cy + size * 0.02, size * 0.14, -Math.PI / 2, Math.PI / 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx - size * 0.12, cy - size * 0.36);
+        ctx.lineTo(cx - size * 0.04, cy - size * 0.48);
+        ctx.moveTo(cx + size * 0.1, cy - size * 0.36);
+        ctx.lineTo(cx + size * 0.18, cy - size * 0.48);
+        ctx.stroke();
+    } else {
+        ctx.font = `${Math.max(12, size * 0.72)}px Arial`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("i", cx, cy);
+    }
+
+    ctx.restore();
+}
+
+function drawNpcRoleIcon(ctx, npc, x, y, scale, highlighted, spoken) {
+    const profile = npcIconProfile(npc);
+    const iconX = x + 10 * scale;
+    const iconY = y - 12 * scale;
+    const radius = (highlighted ? 13 : 11) * scale;
+    const pulse = highlighted ? 1 + Math.sin(state.frame / 10) * 0.08 : 1;
+
+    ctx.save();
+    ctx.shadowColor = highlighted ? profile.color : "rgba(0, 0, 0, 0.28)";
+    ctx.shadowBlur = highlighted ? 16 : 7;
+    ctx.fillStyle = "rgba(5, 13, 27, 0.92)";
+    ctx.beginPath();
+    ctx.arc(iconX, iconY, radius * pulse, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.lineWidth = 2 * scale;
+    ctx.strokeStyle = spoken ? "rgba(121, 240, 202, 0.92)" : profile.color;
+    ctx.stroke();
+    drawRoleSymbol(ctx, profile.type, iconX, iconY, radius * 1.14, profile.color);
+
+    if (spoken) {
+        ctx.fillStyle = "#79f0ca";
+        ctx.beginPath();
+        ctx.arc(iconX + radius * 0.78, iconY - radius * 0.72, 4 * scale, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#06111f";
+        ctx.lineWidth = 1.4 * scale;
+        ctx.beginPath();
+        ctx.moveTo(iconX + radius * 0.62, iconY - radius * 0.72);
+        ctx.lineTo(iconX + radius * 0.75, iconY - radius * 0.58);
+        ctx.lineTo(iconX + radius * 0.98, iconY - radius * 0.88);
+        ctx.stroke();
+    }
+
+    if (highlighted) {
+        ctx.font = `${Math.max(8, 9 * scale)}px Arial`;
+        const width = ctx.measureText(profile.label).width + 10 * scale;
+        ctx.fillStyle = "rgba(5, 13, 27, 0.9)";
+        ctx.fillRect(iconX - width / 2, iconY - radius - 16 * scale, width, 12 * scale);
+        ctx.fillStyle = profile.color;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(profile.label, iconX, iconY - radius - 10 * scale);
+    }
+
+    ctx.restore();
+}
+
+function drawHumanoid(ctx, x, y, options = {}) {
+    const scale = options.scale || 1;
+    const palette = options.palette || {};
+    const shirt = palette.shirt || "#2e69df";
+    const pants = palette.pants || "#243c66";
+    const accent = palette.accent || "#79f0ca";
+    const hair = palette.hair || "#2f2530";
+    const skin = palette.skin || "#f0c7a2";
+    const label = options.label || "";
+    const npc = options.npc || null;
+    const highlight = Boolean(options.highlight);
+    const found = Boolean(options.found);
+    const spoken = Boolean(options.spoken);
+    const sway = Math.sin(state.frame / 12 + (options.phase || 0)) * 1.2 * scale;
+
+    ctx.save();
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    if (npc) {
+        ctx.fillStyle = highlight ? "rgba(121, 240, 202, 0.22)" : "rgba(216, 108, 255, 0.13)";
+        ctx.beginPath();
+        ctx.ellipse(x + 10 * scale, y + 31 * scale, 15 * scale, 7 * scale, 0, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.18)";
+    ctx.beginPath();
+    ctx.ellipse(x + 10 * scale, y + 30 * scale, 8 * scale, 3.4 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (highlight) {
+        ctx.strokeStyle = "rgba(121, 240, 202, 0.95)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(x + 10 * scale, y + 15 * scale, npc ? 16 * scale : 14 * scale, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    ctx.fillStyle = skin;
+    ctx.beginPath();
+    ctx.arc(x + 10 * scale, y + 6 * scale, 5.4 * scale, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = hair;
+    ctx.beginPath();
+    ctx.arc(x + 10 * scale, y + 4.8 * scale, 5.6 * scale, Math.PI, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#17263b";
+    ctx.beginPath();
+    ctx.arc(x + 7.9 * scale, y + 6.4 * scale, 0.85 * scale, 0, Math.PI * 2);
+    ctx.arc(x + 12.1 * scale, y + 6.4 * scale, 0.85 * scale, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = "rgba(142, 75, 61, 0.72)";
+    ctx.lineWidth = 1 * scale;
+    ctx.beginPath();
+    ctx.arc(x + 10 * scale, y + 8.6 * scale, 2.4 * scale, 0.15 * Math.PI, 0.85 * Math.PI);
+    ctx.stroke();
+
+    ctx.fillStyle = accent;
+    ctx.fillRect(x + 3 * scale, y + 11 * scale, 14 * scale, 3 * scale);
+
+    ctx.fillStyle = shirt;
+    ctx.beginPath();
+    ctx.moveTo(x + 4 * scale, y + 13 * scale);
+    ctx.lineTo(x + 16 * scale, y + 13 * scale);
+    ctx.lineTo(x + 14 * scale, y + 24 * scale);
+    ctx.lineTo(x + 6 * scale, y + 24 * scale);
+    ctx.closePath();
+    ctx.fill();
+
+    if (npc) {
+        ctx.fillStyle = accent;
+        ctx.beginPath();
+        ctx.arc(x + 13.2 * scale, y + 17.2 * scale, 2.2 * scale, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "rgba(6, 17, 31, 0.82)";
+        ctx.beginPath();
+        ctx.arc(x + 13.2 * scale, y + 17.2 * scale, 0.85 * scale, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    ctx.strokeStyle = shirt;
+    ctx.lineWidth = 3 * scale;
+    ctx.beginPath();
+    ctx.moveTo(x + 5 * scale, y + 15 * scale);
+    ctx.lineTo(x + 2 * scale + sway, y + 21 * scale);
+    ctx.moveTo(x + 15 * scale, y + 15 * scale);
+    ctx.lineTo(x + 18 * scale - sway, y + 21 * scale);
+    ctx.stroke();
+
+    ctx.fillStyle = pants;
+    ctx.fillRect(x + 6 * scale, y + 23 * scale, 8 * scale, 4 * scale);
+
+    ctx.strokeStyle = pants;
+    ctx.lineWidth = 3 * scale;
+    ctx.beginPath();
+    ctx.moveTo(x + 8 * scale, y + 24 * scale);
+    ctx.lineTo(x + 6 * scale - sway * 0.5, y + 32 * scale);
+    ctx.moveTo(x + 12 * scale, y + 24 * scale);
+    ctx.lineTo(x + 14 * scale + sway * 0.5, y + 32 * scale);
+    ctx.stroke();
+
+    ctx.strokeStyle = "#20314a";
+    ctx.lineWidth = 2 * scale;
+    ctx.beginPath();
+    ctx.moveTo(x + 4 * scale, y + 32 * scale);
+    ctx.lineTo(x + 8 * scale, y + 32 * scale);
+    ctx.moveTo(x + 12 * scale, y + 32 * scale);
+    ctx.lineTo(x + 16 * scale, y + 32 * scale);
+    ctx.stroke();
+
+    if (found || highlight) {
+        ctx.fillStyle = found ? "#79f0ca" : "#ffd36e";
+        ctx.beginPath();
+        ctx.arc(x + 18 * scale, y + 7 * scale, 2.6 * scale, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    if (npc) {
+        drawNpcRoleIcon(ctx, npc, x, y, scale, highlight, spoken);
+    }
+
+    if (label) {
+        ctx.font = `${Math.max(11, 12 * scale)}px Arial`;
+        const width = ctx.measureText(label).width + 14;
+        const bubbleX = x + 10 * scale - width / 2;
+        const bubbleY = y - (npc ? 40 : 18) * scale;
+        ctx.fillStyle = "rgba(8, 20, 39, 0.92)";
+        ctx.fillRect(bubbleX, bubbleY, width, 18);
+        ctx.strokeStyle = "rgba(121, 240, 202, 0.3)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(bubbleX, bubbleY, width, 18);
+        ctx.fillStyle = "#eef5ff";
+        ctx.fillText(label, bubbleX + 7, bubbleY + 13);
+    }
+
+    ctx.restore();
+}
+
+function drawOutdoor(layout) {
+    const s = layout.s;
+    const sky = gameCtx.createLinearGradient(0, 0, 0, gameCanvas.height);
+    sky.addColorStop(0, "#8fd3ff");
+    sky.addColorStop(0.34, "#caf1ff");
+    sky.addColorStop(0.3401, "#79b77b");
+    sky.addColorStop(1, "#498953");
+
+    gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+    gameCtx.fillStyle = sky;
+    gameCtx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+    gameCtx.fillStyle = "#4d8960";
+    gameCtx.fillRect(0, gameCanvas.height - 68 * s, gameCanvas.width, 68 * s);
+
+    gameCtx.fillStyle = "#cfd7df";
+    gameCtx.fillRect(layout.frontPlaza.x, layout.frontPlaza.y, layout.frontPlaza.w, layout.frontPlaza.h);
+    gameCtx.fillStyle = "#b9c3cc";
+    gameCtx.fillRect(layout.boulevard.x, layout.boulevard.y, layout.boulevard.w, layout.boulevard.h);
+    gameCtx.fillStyle = "rgba(255, 255, 255, 0.42)";
+    for (let i = 0; i < 8; i++) {
+        gameCtx.fillRect(layout.boulevard.x + 18 * s, layout.boulevard.y + 24 * s + i * 62 * s, layout.boulevard.w - 36 * s, 8 * s);
+    }
+
+    gameCtx.fillStyle = "#d8dce1";
+    gameCtx.fillRect(layout.northBar.x, layout.northBar.y, layout.northBar.w, layout.northBar.h);
+    gameCtx.fillRect(layout.westWing.x, layout.westWing.y, layout.westWing.w, layout.westWing.h);
+    gameCtx.fillRect(layout.eastWing.x, layout.eastWing.y, layout.eastWing.w, layout.eastWing.h);
+    gameCtx.fillStyle = "#9fd7f0";
+    gameCtx.fillRect(layout.atrium.x, layout.atrium.y, layout.atrium.w, layout.atrium.h);
+
+    gameCtx.strokeStyle = "#7a8a98";
+    gameCtx.lineWidth = 2;
+    gameCtx.strokeRect(layout.northBar.x, layout.northBar.y, layout.northBar.w, layout.northBar.h);
+    gameCtx.strokeRect(layout.westWing.x, layout.westWing.y, layout.westWing.w, layout.westWing.h);
+    gameCtx.strokeRect(layout.eastWing.x, layout.eastWing.y, layout.eastWing.w, layout.eastWing.h);
+    gameCtx.strokeRect(layout.atrium.x, layout.atrium.y, layout.atrium.w, layout.atrium.h);
+
+    gameCtx.fillStyle = "#5b3d25";
+    gameCtx.fillRect(layout.entryZone.x + 24 * s, layout.entryZone.y - 14 * s, layout.entryZone.w - 48 * s, 12 * s);
+    gameCtx.strokeStyle = state.interactionTarget && !state.inside ? "#79f0ca" : "rgba(255, 255, 255, 0.25)";
+    gameCtx.strokeRect(layout.entryZone.x, layout.entryZone.y, layout.entryZone.w, layout.entryZone.h);
+
+    gameCtx.fillStyle = "#d8e39b";
+    gameCtx.fillRect(layout.garden.x, layout.garden.y, layout.garden.w, layout.garden.h);
+    gameCtx.fillStyle = "rgba(255, 255, 255, 0.18)";
+    gameCtx.fillRect(layout.garden.x + 16 * s, layout.garden.y + 18 * s, 76 * s, 22 * s);
+    gameCtx.fillRect(layout.garden.x + 118 * s, layout.garden.y + 104 * s, 88 * s, 20 * s);
+
+    gameCtx.fillStyle = "#8dd6ed";
+    gameCtx.fillRect(layout.waterCourt.x, layout.waterCourt.y, layout.waterCourt.w, layout.waterCourt.h);
+    gameCtx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+    gameCtx.strokeRect(layout.waterCourt.x + 8, layout.waterCourt.y + 8, layout.waterCourt.w - 16, layout.waterCourt.h - 16);
+    gameCtx.strokeStyle = "rgba(255, 255, 255, 0.26)";
+    for (let i = 0; i < 3; i++) {
+        gameCtx.beginPath();
+        gameCtx.arc(layout.waterCourt.x + 70 * s + i * 58 * s, layout.waterCourt.y + 76 * s, 18 * s, 0, Math.PI * 2);
+        gameCtx.stroke();
+    }
+
+    gameCtx.fillStyle = "#d6c8b8";
+    gameCtx.fillRect(layout.amphitheater.x, layout.amphitheater.y, layout.amphitheater.w, layout.amphitheater.h);
+    for (let i = 0; i < 5; i++) {
+        gameCtx.fillStyle = i % 2 === 0 ? "#b99e82" : "#c5ac8d";
+        gameCtx.fillRect(layout.amphitheater.x + 18 * s + i * 12 * s, layout.amphitheater.y + 18 * s + i * 18 * s, layout.amphitheater.w - 36 * s - i * 24 * s, 12 * s);
+    }
+
+    gameCtx.fillStyle = "#6cc3e5";
+    gameCtx.fillRect(layout.sportsDeck.x, layout.sportsDeck.y, layout.sportsDeck.w, layout.sportsDeck.h);
+    gameCtx.strokeStyle = "rgba(255, 255, 255, 0.82)";
+    gameCtx.strokeRect(layout.sportsDeck.x + 8, layout.sportsDeck.y + 8, layout.sportsDeck.w - 16, layout.sportsDeck.h - 16);
+    gameCtx.beginPath();
+    gameCtx.moveTo(layout.sportsDeck.x + layout.sportsDeck.w / 2, layout.sportsDeck.y + 8);
+    gameCtx.lineTo(layout.sportsDeck.x + layout.sportsDeck.w / 2, layout.sportsDeck.y + layout.sportsDeck.h - 8);
+    gameCtx.stroke();
+    gameCtx.beginPath();
+    gameCtx.arc(layout.sportsDeck.x + layout.sportsDeck.w / 2, layout.sportsDeck.y + layout.sportsDeck.h / 2, 22 * s, 0, Math.PI * 2);
+    gameCtx.stroke();
+
+    gameCtx.fillStyle = "#7cb099";
+    gameCtx.fillRect(layout.frontPlaza.x + 118 * s, layout.frontPlaza.y + 116 * s, 42 * s, 26 * s);
+    gameCtx.fillRect(layout.frontPlaza.x + layout.frontPlaza.w - 160 * s, layout.frontPlaza.y + 116 * s, 42 * s, 26 * s);
+
+    const treeSize = 20 * s;
+    for (let i = 0; i < 6; i++) {
+        drawTree(gameCtx, layout.garden.x + 26 * s + i * 38 * s, layout.garden.y + 28 * s, treeSize);
+        drawTree(gameCtx, layout.waterCourt.x + 30 * s + i * 36 * s, layout.waterCourt.y + layout.waterCourt.h - 24 * s, treeSize * 0.9);
+    }
+
+    for (let i = 0; i < 4; i++) {
+        drawTree(gameCtx, layout.frontPlaza.x - 30 * s, layout.frontPlaza.y + 30 * s + i * 36 * s, treeSize * 0.88);
+        drawTree(gameCtx, layout.frontPlaza.x + layout.frontPlaza.w + 30 * s, layout.frontPlaza.y + 30 * s + i * 36 * s, treeSize * 0.88);
+    }
+
+    drawBench(gameCtx, layout.frontPlaza.x + 44 * s, layout.frontPlaza.y + 38 * s, 30 * s);
+    drawBench(gameCtx, layout.frontPlaza.x + layout.frontPlaza.w - 74 * s, layout.frontPlaza.y + 38 * s, 30 * s);
+
+    gameCtx.fillStyle = "#eff6fc";
+    gameCtx.font = `${Math.max(16, 22 * s)}px Arial`;
+    gameCtx.fillText("Главный корпус / атриум", layout.northBar.x + 20 * s, layout.northBar.y - 14 * s);
+    gameCtx.font = `${Math.max(12, 15 * s)}px Arial`;
+    gameCtx.fillText("Вход E", layout.entryZone.x + 34 * s, layout.entryZone.y + 24 * s);
+    gameCtx.fillText("Garden", layout.garden.x + 12 * s, layout.garden.y - 8 * s);
+    gameCtx.fillText("Reflect", layout.waterCourt.x + 12 * s, layout.waterCourt.y - 8 * s);
+    gameCtx.fillText("Arena", layout.amphitheater.x + 12 * s, layout.amphitheater.y - 8 * s);
+    gameCtx.fillText("Sport", layout.sportsDeck.x + 12 * s, layout.sportsDeck.y - 8 * s);
+
+    for (const hotspot of layout.hotspots) {
+        drawMarker(gameCtx, hotspot, state.visitedHotspots.has(hotspot.id));
+    }
+}
+
+function drawRoom(ctx, room, fill, label) {
+    ctx.fillStyle = fill;
+    ctx.fillRect(room.x, room.y, room.w, room.h);
+    ctx.strokeStyle = "#7a8894";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(room.x, room.y, room.w, room.h);
+    ctx.fillStyle = "#203445";
+    ctx.font = `${Math.max(13, 16 * getScale())}px Arial`;
+    ctx.fillText(label, room.x + 10, room.y + 24);
+}
+
+function drawDeskGrid(room, cols, rows, color) {
+    const stepX = (room.w - 36) / cols;
+    const stepY = (room.h - 34) / rows;
+    gameCtx.fillStyle = color;
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            const x = room.x + 18 + col * stepX;
+            const y = room.y + 18 + row * stepY;
+            gameCtx.fillRect(x, y, 22, 12);
+        }
+    }
+}
+
+function drawIndoor(layout) {
+    const s = layout.s;
+    gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+    gameCtx.fillStyle = layout.floor === 2 ? "#e9edf3" : "#e5e8ec";
+    gameCtx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+    gameCtx.fillStyle = layout.floor === 2 ? "#d3dbe4" : "#cfd6dd";
+    for (const hall of layout.halls || []) {
+        gameCtx.fillRect(hall.x, hall.y, hall.w, hall.h);
+    }
+
+    if (layout.atriumHall) {
+        gameCtx.fillRect(layout.atriumHall.x - 22 * s, layout.atriumHall.y + 74 * s, layout.atriumHall.w + 44 * s, 54 * s);
+        gameCtx.fillStyle = "#9ad3eb";
+        gameCtx.fillRect(layout.atriumHall.x + 28 * s, layout.atriumHall.y + 22 * s, layout.atriumHall.w - 56 * s, 30 * s);
+        gameCtx.fillStyle = "#87c9a5";
+        gameCtx.fillRect(layout.atriumHall.x + 36 * s, layout.atriumHall.y + 92 * s, layout.atriumHall.w - 72 * s, 76 * s);
+    }
+
+    if (layout.balcony) {
+        gameCtx.fillStyle = "#9ad3eb";
+        gameCtx.fillRect(layout.balcony.x + 34 * s, layout.balcony.y + 20 * s, layout.balcony.w - 68 * s, 26 * s);
+        gameCtx.fillStyle = "#b8d7ea";
+        gameCtx.fillRect(layout.balcony.x + 42 * s, layout.balcony.y + 82 * s, layout.balcony.w - 84 * s, 46 * s);
+    }
+
+    for (const room of layout.rooms || []) {
+        drawRoom(gameCtx, room.area, room.fill, room.label);
+        if (room.desks) {
+            drawDeskGrid(room.area, room.desks[0], room.desks[1], room.desks[2]);
+        }
+    }
+
+    if (layout.projectHall) {
+        gameCtx.fillStyle = "#6f767d";
+        gameCtx.fillRect(layout.projectHall.x + 28 * s, layout.projectHall.y + 18 * s, 72 * s, 16 * s);
+        gameCtx.fillRect(layout.projectHall.x + layout.projectHall.w - 100 * s, layout.projectHall.y + 18 * s, 72 * s, 16 * s);
+        gameCtx.fillStyle = "#7fc1a8";
+        gameCtx.fillRect(layout.projectHall.x + layout.projectHall.w / 2 - 42 * s, layout.projectHall.y + 20 * s, 34 * s, 34 * s);
+        gameCtx.fillRect(layout.projectHall.x + layout.projectHall.w / 2 + 8 * s, layout.projectHall.y + 20 * s, 34 * s, 34 * s);
+    }
+
+    if (layout.cowork) {
+        gameCtx.fillStyle = "#6f767d";
+        gameCtx.fillRect(layout.cowork.x + 28 * s, layout.cowork.y + 18 * s, 62 * s, 16 * s);
+        gameCtx.fillRect(layout.cowork.x + layout.cowork.w - 90 * s, layout.cowork.y + 18 * s, 62 * s, 16 * s);
+        gameCtx.fillStyle = "#7fc1a8";
+        gameCtx.fillRect(layout.cowork.x + 118 * s, layout.cowork.y + 16 * s, 34 * s, 34 * s);
+        gameCtx.fillRect(layout.cowork.x + 162 * s, layout.cowork.y + 16 * s, 34 * s, 34 * s);
+    }
+
+    const stairZone = layout.upZone || layout.downZone;
+    if (stairZone) {
+        const activeStair = state.interactionTarget && (state.interactionTarget.type === "upstairs" || state.interactionTarget.type === "downstairs");
+        gameCtx.fillStyle = activeStair ? "#79f0ca" : "#7b8490";
+        gameCtx.fillRect(stairZone.x, stairZone.y, stairZone.w, stairZone.h);
+        gameCtx.strokeStyle = activeStair ? "#06111f" : "rgba(0, 0, 0, 0.24)";
+        gameCtx.lineWidth = 2;
+        gameCtx.strokeRect(stairZone.x, stairZone.y, stairZone.w, stairZone.h);
+        gameCtx.strokeStyle = "rgba(255, 255, 255, 0.62)";
+        for (let i = 1; i < 5; i++) {
+            const y = stairZone.y + (stairZone.h / 5) * i;
+            gameCtx.beginPath();
+            gameCtx.moveTo(stairZone.x + 8 * s, y);
+            gameCtx.lineTo(stairZone.x + stairZone.w - 8 * s, y);
+            gameCtx.stroke();
+        }
+    }
+
+    if (layout.exitZone) {
+        gameCtx.fillStyle = "#5b3d25";
+        gameCtx.fillRect(layout.exitZone.x, layout.exitZone.y, layout.exitZone.w, layout.exitZone.h);
+        gameCtx.strokeStyle = state.interactionTarget && state.interactionTarget.type === "exit" ? "#79f0ca" : "rgba(0, 0, 0, 0.18)";
+        gameCtx.lineWidth = 2;
+        gameCtx.strokeRect(layout.exitZone.x, layout.exitZone.y, layout.exitZone.w, layout.exitZone.h);
+    }
+
+    gameCtx.fillStyle = "#213446";
+    gameCtx.font = `${Math.max(16, 22 * s)}px Arial`;
+    gameCtx.fillText(layout.floor === 2 ? "Внутренний маршрут / второй этаж" : "Внутренний маршрут / атриум", 24 * s, 30 * s);
+    gameCtx.font = `${Math.max(12, 15 * s)}px Arial`;
+    if (layout.cowork) gameCtx.fillText("Coworking", layout.cowork.x + 12 * s, layout.cowork.y + 58 * s);
+    if (layout.projectHall) gameCtx.fillText("Проектная галерея", layout.projectHall.x + 12 * s, layout.projectHall.y + 58 * s);
+    if (layout.upZone) gameCtx.fillText("2 этаж E", layout.upZone.x + 12 * s, layout.upZone.y - 8 * s);
+    if (layout.downZone) gameCtx.fillText("1 этаж E", layout.downZone.x + 34 * s, layout.downZone.y - 8 * s);
+    if (layout.exitZone) gameCtx.fillText("Выход E", layout.exitZone.x + 26 * s, layout.exitZone.y - 8 * s);
+
+    for (const hotspot of layout.hotspots) {
+        drawMarker(gameCtx, hotspot, state.visitedHotspots.has(hotspot.id));
+    }
+}
+
+function drawNpcs(layout) {
+    for (const npc of layout.npcs) {
+        drawHumanoid(gameCtx, npc.x, npc.y, {
+            npc,
+            scale: npc.scale,
+            palette: npc.palette,
+            label: state.activeNpc && state.activeNpc.id === npc.id ? npc.name : "",
+            found: state.foundNpcs.has(npc.id),
+            spoken: state.spokenNpcs.has(npc.id),
+            highlight: state.activeNpc && state.activeNpc.id === npc.id,
+            phase: npc.x * 0.01
+        });
+    }
+}
+
+function drawPlayer() {
+    drawHumanoid(gameCtx, player.x + 1, player.y - 4, {
+        scale: 1.16,
+        palette: {
+            shirt: "#1d5be3",
+            pants: "#1e3354",
+            accent: "#79f0ca",
+            hair: "#2b2531",
+            skin: "#efc6a2"
+        },
+        found: true,
+        phase: 0
+    });
+}
+
+function mapRect(room) {
+    return {
+        x: (room.x / gameCanvas.width) * minimapCanvas.width,
+        y: (room.y / gameCanvas.height) * minimapCanvas.height,
+        w: (room.w / gameCanvas.width) * minimapCanvas.width,
+        h: (room.h / gameCanvas.height) * minimapCanvas.height
+    };
+}
+
+function drawMinimap(layout) {
+    minimapCtx.clearRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+    minimapCtx.fillStyle = state.inside ? "#d7dde4" : "#6aa06e";
+    minimapCtx.fillRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+
+    if (!state.inside) {
+        minimapCtx.fillStyle = "#cfd7df";
+        for (const room of [layout.northBar, layout.westWing, layout.eastWing, layout.atrium, layout.frontPlaza, layout.boulevard]) {
+            const m = mapRect(room);
+            minimapCtx.fillRect(m.x, m.y, m.w, m.h);
+        }
+    } else {
+        minimapCtx.fillStyle = "#cad2da";
+        const mapRooms = [
+            ...(layout.rooms || []).map((room) => room.area),
+            ...(layout.halls || []),
+            layout.upZone,
+            layout.downZone,
+            layout.exitZone
+        ].filter(Boolean);
+
+        for (const room of mapRooms) {
+            const m = mapRect(room);
+            minimapCtx.fillRect(m.x, m.y, m.w, m.h);
+        }
+    }
+
+    for (const hotspot of layout.hotspots) {
+        const m = mapRect(hotspot.area);
+        minimapCtx.fillStyle = state.visitedHotspots.has(hotspot.id) ? "rgba(121, 240, 202, 0.9)" : "rgba(255, 211, 110, 0.9)";
+        minimapCtx.fillRect(m.x + m.w / 2 - 2, m.y + m.h / 2 - 2, 4, 4);
+    }
+
+    for (const npc of layout.npcs) {
+        const x = (npc.x / gameCanvas.width) * minimapCanvas.width;
+        const y = (npc.y / gameCanvas.height) * minimapCanvas.height;
+        const profile = npcIconProfile(npc);
+        const active = state.activeNpc && state.activeNpc.id === npc.id;
+        const spoken = state.spokenNpcs.has(npc.id);
+        const radius = active ? 5.4 : 4.2;
+
+        minimapCtx.fillStyle = spoken ? "#79f0ca" : profile.color;
+        minimapCtx.beginPath();
+        minimapCtx.arc(x + 4, y + 7, radius, 0, Math.PI * 2);
+        minimapCtx.fill();
+        minimapCtx.lineWidth = active ? 2 : 1;
+        minimapCtx.strokeStyle = active ? "#ffffff" : "rgba(6, 17, 31, 0.78)";
+        minimapCtx.stroke();
+        minimapCtx.fillStyle = "#06111f";
+        minimapCtx.font = "bold 5px Arial";
+        minimapCtx.textAlign = "center";
+        minimapCtx.textBaseline = "middle";
+        minimapCtx.fillText(profile.label.slice(0, 1), x + 4, y + 7.4);
+    }
+
+    minimapCtx.fillStyle = "#1d5be3";
+    minimapCtx.beginPath();
+    minimapCtx.arc((player.x / gameCanvas.width) * minimapCanvas.width, (player.y / gameCanvas.height) * minimapCanvas.height, 4, 0, Math.PI * 2);
+    minimapCtx.fill();
+    minimapCtx.strokeStyle = "#ffffff";
+    minimapCtx.stroke();
+}
+
+function render(layout) {
+    if (state.inside) {
+        drawIndoor(layout);
+    } else {
+        drawOutdoor(layout);
+    }
+
+    drawNpcs(layout);
+    drawPlayer();
+    drawObjectiveBeacon(layout);
+    drawMinimap(layout);
+}
+
+function gameLoop() {
+    state.frame++;
+
+    let layout = getLayout();
+    movePlayer(layout);
+
+    layout = getLayout();
+    updateInteraction(layout);
+    updateActiveNpc(layout);
+    updateActiveHotspot(layout);
+    handleAction();
+
+    layout = getLayout();
+    updateInteraction(layout);
+    updateActiveNpc(layout);
+    updateActiveHotspot(layout);
+    maybeShowFinish();
+    render(layout);
+    updateUi();
+
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+
+</body>
+</html>
