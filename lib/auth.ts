@@ -1,11 +1,12 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 
 export const ADMIN_SESSION_COOKIE = "smart_tour_admin";
 const sessionLifetimeSeconds = 60 * 60 * 8;
+const disabledProductionSecret = `disabled-${randomBytes(32).toString("hex")}`;
 
-const getAdminPassword = () => process.env.ADMIN_PASSWORD || "123456789";
+const getAdminPassword = () => process.env.ADMIN_PASSWORD || (process.env.NODE_ENV === "production" ? disabledProductionSecret : "123456789");
 
 const getSessionSecret = () => process.env.ADMIN_SESSION_SECRET || getAdminPassword();
 
