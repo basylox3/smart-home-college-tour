@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .next/
+.vercel/
 out/
 .env
 .env.local
@@ -10,3 +11,5 @@ data/*.sqlite
 data/*.sqlite-*
 public/uploads/
 *.log
+
+.vercel
