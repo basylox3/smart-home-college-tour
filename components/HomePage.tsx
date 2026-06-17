@@ -58,6 +58,16 @@ const sampleReviews: CollegeReview[] = [
     isSample: true,
   },
 ];
+const heroHudCards = [
+  ["Live", "контент тянется с сервера"],
+  ["360", "панорамы реагируют на курсор"],
+  ["Game", "отдельный интерактивный режим"],
+];
+const experienceCards = [
+  ["01", "Сайт движется", "Секции раскрываются каскадом, карточки реагируют на глубину, курсор управляет светом."],
+  ["02", "Тур ощущается объемным", "Панорамы, кольца, лучи, спутники и 3D-карусель создают ощущение цифрового макета."],
+  ["03", "Контент живой", "Новые сцены, отзывы, планы и игровая вкладка остаются частью единой витрины."],
+];
 
 function getReviewInitials(name: string) {
   const initials = name
@@ -261,13 +271,19 @@ export function HomePage({ initialScenes }: HomePageProps) {
     <>
       <InteractiveShell />
       <div className="page-shell">
+        <a className="skip-link" href="#main-content">
+          Перейти к содержимому
+        </a>
+
         <header className="site-header">
           <a className="brand" href="#top" aria-label="Перейти к началу страницы">
-            <span className="brand-mark">ПК</span>
+            <span className="brand-mark" aria-hidden="true">
+              <img src="/college-logo.svg" alt="" />
+            </span>
             <span className="brand-text">Перспективный колледж</span>
           </a>
 
-          <button className="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <button className="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="site-nav">
             <span />
             <span />
           </button>
@@ -291,7 +307,7 @@ export function HomePage({ initialScenes }: HomePageProps) {
           </nav>
         </header>
 
-        <main>
+        <main id="main-content">
           <section className="hero section" id="top">
             <div className="hero-copy reveal">
               <p className="eyebrow">Интерактивная презентация нового поколения</p>
@@ -301,6 +317,27 @@ export function HomePage({ initialScenes }: HomePageProps) {
                 Панорамные сцены управляются из админки, а публичная страница всегда берет свежие
                 данные с сервера.
               </p>
+
+              <div className="hero-signal-card kinetic-item" aria-label="Живой статус сайта">
+                <span>Живая витрина кампуса</span>
+                <strong>3D тур + планы + игра</strong>
+                <div className="signal-bars" aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                </div>
+              </div>
+
+              <div className="hero-hud-grid" aria-label="Быстрые возможности сайта">
+                {heroHudCards.map(([label, text]) => (
+                  <article className="hero-hud-card kinetic-item" key={label}>
+                    <span>{label}</span>
+                    <p>{text}</p>
+                  </article>
+                ))}
+              </div>
 
               <div className="hero-actions">
                 <a className="button magnet" href="#tour">
@@ -315,10 +352,10 @@ export function HomePage({ initialScenes }: HomePageProps) {
               </div>
 
               <ul className="hero-badges" aria-label="Преимущества">
-                <li>Панорамы 360 для аудиторий</li>
-                <li>React-графика и плавные состояния</li>
-                <li>SQLite-хранилище и защищенный API</li>
-                <li>Отдельная вкладка интерактивной игры</li>
+                <li className="kinetic-item">Панорамы 360 для аудиторий</li>
+                <li className="kinetic-item">React-графика и плавные состояния</li>
+                <li className="kinetic-item">SQLite-хранилище и защищенный API</li>
+                <li className="kinetic-item">Отдельная вкладка интерактивной игры</li>
               </ul>
             </div>
 
@@ -335,6 +372,15 @@ export function HomePage({ initialScenes }: HomePageProps) {
                 />
                 <div className="scene-ring ring-a" data-float data-x="0" data-y="0" data-z="40" data-depth="0.04" />
                 <div className="scene-ring ring-b" data-float data-x="0" data-y="0" data-z="90" data-depth="0.06" />
+                <div className="scene-beam scene-beam--a" data-float data-x="-110" data-y="52" data-z="110" data-depth="0.045" />
+                <div className="scene-beam scene-beam--b" data-float data-x="116" data-y="68" data-z="126" data-depth="0.05" />
+
+                <div className="scene-satellite satellite-a" data-float data-x="-118" data-y="58" data-z="220" data-depth="0.09">
+                  <span>VR</span>
+                </div>
+                <div className="scene-satellite satellite-b" data-float data-x="124" data-y="54" data-z="230" data-depth="0.1">
+                  <span>API</span>
+                </div>
 
                 <div className="scene-core" data-float data-x="0" data-y="0" data-z="140" data-depth="0.08">
                   <div className="scene-core__halo" />
@@ -346,33 +392,61 @@ export function HomePage({ initialScenes }: HomePageProps) {
                   <div className="scene-core__pulse" />
                 </div>
 
-                <article className="float-panel float-panel--left" data-float data-x="-158" data-y="-118" data-z="190" data-depth="0.08">
+                <article className="float-panel float-panel--left" data-float data-x="-142" data-y="-132" data-z="176" data-depth="0.045">
                   <span className="panel-label">Маршрут</span>
                   <strong>{scenes.length} сцен</strong>
-                  <p>Атриум, лаборатории, проекты и любые новые точки из админки.</p>
                 </article>
 
-                <article className="float-panel float-panel--right" data-float data-x="158" data-y="-118" data-z="210" data-depth="0.08">
+                <article className="float-panel float-panel--right" data-float data-x="142" data-y="-132" data-z="184" data-depth="0.045">
                   <span className="panel-label">Панорамы</span>
                   <strong>360° просмотр</strong>
-                  <p>Загруженные изображения превращаются в живой сферический превью-объект.</p>
                 </article>
 
-                <article className="float-panel float-panel--bottom" data-float data-x="0" data-y="148" data-z="185" data-depth="0.06">
-                  <span className="panel-label">Фокус</span>
-                  <strong>{activeScene?.title || "Активная сцена"}</strong>
-                  <p>Текущая точка тура синхронизирована с каруселью.</p>
-                </article>
+                <div className="holo-node node-a" data-float data-x="-82" data-y="-18" data-z="260" data-depth="0.11" />
+                <div className="holo-node node-b" data-float data-x="92" data-y="18" data-z="250" data-depth="0.12" />
+                <div className="holo-node node-c" data-float data-x="0" data-y="-92" data-z="245" data-depth="0.09" />
 
                 <div className="scan-line" />
+                <div className="scene-interaction-dock" aria-label="Быстрое управление сценой">
+                  <button className="control-button scene-dock-icon" type="button" onClick={() => stepCarousel(-1)} aria-label="Предыдущая сцена">
+                    ←
+                  </button>
+                  <span className="scene-dock-current">{activeScene?.title || "Активная сцена"}</span>
+                  <button className="control-button control-primary magnet scene-dock-open" type="button" onClick={() => setViewerSceneIndex(activeCard)}>
+                    Открыть
+                  </button>
+                  <button className="control-button scene-dock-icon" type="button" onClick={() => stepCarousel(1)} aria-label="Следующая сцена">
+                    →
+                  </button>
+                </div>
               </div>
             </div>
 
             <div className="stats-grid reveal">
               {tourStats.map(([value, label]) => (
-                <article className="stat-card" data-tilt key={value}>
+                <article className="stat-card kinetic-item" data-tilt key={value}>
                   <strong>{value}</strong>
                   <span>{label}</span>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="experience section" aria-label="Новый уровень интерактивности">
+            <div className="motion-ribbon reveal" aria-hidden="true">
+              <span>3D TOUR</span>
+              <span>GSAP MOTION</span>
+              <span>LIVE CAMPUS</span>
+              <span>SMART ADMIN</span>
+              <span>GAME MODE</span>
+            </div>
+
+            <div className="experience-grid reveal">
+              {experienceCards.map(([index, title, text]) => (
+                <article className="experience-card kinetic-item" data-tilt key={index}>
+                  <span>{index}</span>
+                  <h2>{title}</h2>
+                  <p>{text}</p>
                 </article>
               ))}
             </div>
@@ -520,7 +594,7 @@ export function HomePage({ initialScenes }: HomePageProps) {
                 ["02", "Робототехника", "Сенсоры, автоматизация, мехатроника и практические инженерные задачи."],
                 ["03", "Медиа и контент", "Съемка, звук, монтаж, брендинг и цифровая коммуникация в реальных проектах."],
               ].map(([index, title, text]) => (
-                <article className="program-card reveal" data-tilt key={index}>
+                <article className="program-card reveal kinetic-item" data-tilt key={index}>
                   <span className="program-icon">{index}</span>
                   <h3>{title}</h3>
                   <p>{text}</p>
@@ -542,7 +616,7 @@ export function HomePage({ initialScenes }: HomePageProps) {
             <div className="reviews-layout">
               <div className="reviews-list reveal" aria-live="polite">
                 {reviews.map((review) => (
-                  <article className="review-card" data-tilt key={review.id}>
+                  <article className="review-card kinetic-item" data-tilt key={review.id}>
                     <div className="review-card__top">
                       <span className="review-avatar">{getReviewInitials(review.name)}</span>
                       <div>
@@ -582,7 +656,7 @@ export function HomePage({ initialScenes }: HomePageProps) {
 
                 <label>
                   Ваше имя
-                  <input name="name" type="text" placeholder="Например: Мария П." maxLength={40} required />
+                  <input name="name" type="text" placeholder="Например: Мария П.…" maxLength={40} autoComplete="name" required />
                 </label>
 
                 <fieldset className="review-choice-group">
@@ -620,7 +694,8 @@ export function HomePage({ initialScenes }: HomePageProps) {
                     name="text"
                     rows={6}
                     maxLength={620}
-                    placeholder="Напишите 2-4 предложения простым языком"
+                    placeholder="Напишите 2-4 предложения простым языком…"
+                    autoComplete="off"
                     required
                   />
                 </label>
@@ -647,15 +722,15 @@ export function HomePage({ initialScenes }: HomePageProps) {
               </div>
 
               <div className="campus-track">
-                <div className="track-step" data-tilt>
+                <div className="track-step kinetic-item" data-tilt>
                   <strong>01</strong>
                   <span>Вход в защищенную админку по паролю из env</span>
                 </div>
-                <div className="track-step" data-tilt>
+                <div className="track-step kinetic-item" data-tilt>
                   <strong>02</strong>
                   <span>Загрузка панорамной картинки и настройка сцены</span>
                 </div>
-                <div className="track-step" data-tilt>
+                <div className="track-step kinetic-item" data-tilt>
                   <strong>03</strong>
                   <span>Обновление SQLite и публичного 3D тура</span>
                 </div>

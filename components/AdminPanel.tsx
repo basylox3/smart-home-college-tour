@@ -158,7 +158,7 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsPending(true);
-    showMessage("Проверяю пароль...");
+    showMessage("Проверяю пароль…");
 
     try {
       const response = await fetch("/api/auth/login", {
@@ -201,7 +201,7 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
   const handleSubmitScene = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsPending(true);
-    showMessage(form.id ? "Обновляю сцену..." : "Добавляю сцену...");
+    showMessage(form.id ? "Обновляю сцену…" : "Добавляю сцену…");
 
     try {
       const formData = new FormData();
@@ -251,7 +251,7 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
     }
 
     setIsPending(true);
-    showMessage("Удаляю сцену...");
+    showMessage("Удаляю сцену…");
 
     try {
       const response = await fetch("/api/admin/scenes", {
@@ -286,7 +286,7 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
     }
 
     setIsPending(true);
-    showMessage("Сбрасываю тур...");
+    showMessage("Сбрасываю тур…");
 
     try {
       const response = await fetch("/api/admin/scenes/reset", { method: "POST" });
@@ -310,7 +310,7 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
   const saveGameSettings = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsPending(true);
-    showMessage("Сохраняю настройки игры...");
+    showMessage("Сохраняю настройки игры…");
 
     try {
       const response = await fetch("/api/admin/game", {
@@ -339,7 +339,9 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
       <main className="page-shell admin-page">
         <header className="admin-topbar">
           <Link className="brand" href="/">
-            <span className="brand-mark">ПК</span>
+            <span className="brand-mark" aria-hidden="true">
+              <img src="/college-logo.svg" alt="" />
+            </span>
             <span className="brand-text">3D тур</span>
           </Link>
           <div className="admin-topbar__actions">
@@ -389,7 +391,7 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
                   />
                 </label>
                 <button className="button magnet" type="submit" disabled={isPending}>
-                  {isPending ? "Проверяю..." : "Войти в панель"}
+                  {isPending ? "Проверяю…" : "Войти в панель"}
                 </button>
                 <p className={`form-message ${messageState ? `is-${messageState}` : ""}`} role="status">
                   {message}
@@ -422,7 +424,8 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
                       onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
                       name="title"
                       type="text"
-                      placeholder="Например: IT-аудитория"
+                      placeholder="Например: IT-аудитория…"
+                      autoComplete="off"
                       required
                     />
                   </label>
@@ -434,7 +437,8 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
                       onChange={(event) => setForm((current) => ({ ...current, text: event.target.value }))}
                       name="text"
                       rows={4}
-                      placeholder="Кратко опишите пространство для абитуриентов"
+                      placeholder="Кратко опишите пространство для абитуриентов…"
+                      autoComplete="off"
                       required
                     />
                   </label>
@@ -446,7 +450,8 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
                       onChange={(event) => setForm((current) => ({ ...current, tags: event.target.value }))}
                       name="tags"
                       type="text"
-                      placeholder="360, лаборатория, практика"
+                      placeholder="360, лаборатория, практика…"
+                      autoComplete="off"
                     />
                   </label>
 
@@ -465,6 +470,7 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
                       <select
                         value={form.visual}
                         onChange={(event) => setForm((current) => ({ ...current, visual: event.target.value }))}
+                        name="visual"
                       >
                         {visualOptions.map(([value, label]) => (
                           <option key={value} value={value}>
@@ -499,7 +505,7 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
 
                   <div className="form-actions">
                     <button className="button magnet" type="submit" disabled={isPending}>
-                      {isPending ? "Сохраняю..." : editingScene ? "Сохранить сцену" : "Добавить в 3D тур"}
+                      {isPending ? "Сохраняю…" : editingScene ? "Сохранить сцену" : "Добавить в 3D тур"}
                     </button>
                     {editingScene ? (
                       <button
@@ -534,7 +540,7 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
                         <div className="admin-scene-info">
                           <div className="admin-scene-thumb">
                             {scene.panoramaImage ? (
-                              <img src={scene.panoramaImage} alt="" loading="lazy" />
+                              <img src={scene.panoramaImage} alt="" width={64} height={64} loading="lazy" />
                             ) : (
                               <span>{String(index + 1).padStart(2, "0")}</span>
                             )}
@@ -589,9 +595,11 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
                       Название вкладки игры
                       <input
                         type="text"
+                        name="gameTitle"
                         value={gameForm.title}
                         onChange={(event) => setGameForm((current) => ({ ...current, title: event.target.value }))}
-                        placeholder="Например: Прогулка по колледжу"
+                        placeholder="Например: Прогулка по колледжу…"
+                        autoComplete="off"
                         required
                       />
                     </label>
@@ -600,6 +608,7 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
                       Описание
                       <textarea
                         rows={3}
+                        name="gameDescription"
                         value={gameForm.description}
                         onChange={(event) =>
                           setGameForm((current) => ({
@@ -607,7 +616,8 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
                             description: event.target.value,
                           }))
                         }
-                        placeholder="Что пользователь сможет сделать в игре"
+                        placeholder="Что пользователь сможет сделать в игре…"
+                        autoComplete="off"
                         required
                       />
                     </label>
@@ -616,9 +626,11 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
                       Ручная ссылка на игру (необязательно)
                       <input
                         type="text"
+                        name="gameUrl"
                         value={gameForm.gameUrl}
                         onChange={(event) => setGameForm((current) => ({ ...current, gameUrl: event.target.value }))}
-                        placeholder="https://example.com/college-game или /game/files/index.html"
+                        placeholder="https://example.com/college-game или /game/files/index.html…"
+                        autoComplete="off"
                       />
                       <span>
                         Для локальных файлов можно ничего не вводить: вкладка `/game` сама найдет HTML
@@ -641,7 +653,7 @@ export function AdminPanel({ initialAuthorized, initialScenes, initialGameSettin
                         Использовать папку game
                       </button>
                       <button className="button magnet" type="submit" disabled={isPending}>
-                        {isPending ? "Сохраняю..." : "Сохранить игру"}
+                        {isPending ? "Сохраняю…" : "Сохранить игру"}
                       </button>
                     </div>
                   </form>

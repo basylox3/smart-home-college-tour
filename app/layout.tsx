@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito } from "next/font/google";
 import type { ReactNode } from "react";
+import { IntroVideoOverlay } from "../components/IntroVideoOverlay";
 import "../styles.css";
 
 const heroFont = Nunito({
@@ -40,7 +41,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="ru">
-      <body className={heroFont.variable}>{children}</body>
+      <body className={heroFont.variable}>
+        <IntroVideoOverlay />
+        {children}
+      </body>
     </html>
   );
 }

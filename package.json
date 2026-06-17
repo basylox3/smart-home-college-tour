@@ -10,6 +10,7 @@
     "preview": "next start -H 0.0.0.0 -p 4173"
   },
   "dependencies": {
+    "gsap": "^3.15.0",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest"

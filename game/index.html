@@ -1075,7 +1075,7 @@
             <ol class="tutorial-list">
                 <li>Исследуй уличный маршрут: площадь, сад, амфитеатр и спортивную зону.</li>
                 <li>Подходи к персонажам и читай RPG-диалоги по центру экрана.</li>
-                <li>Следуй за стрелкой цели: она приведёт к кабинетам, людям и лестнице на 2 этаж.</li>
+                <li>Следуй за стрелкой цели: она приведет к кабинетам, людям и лестницам до 4 этажа.</li>
                 <li>На телефоне используй D-pad и нижний ползунок для движения.</li>
             </ol>
         </div>
@@ -1342,12 +1342,62 @@ const dialogueScripts = {
     "ci-media": [
         "Медиастудия на втором этаже нужна для записи, монтажа и подготовки презентаций.",
         "Здесь студенты превращают проекты в понятные истории: видео, звук, визуал и защита.",
-        "Когда закончишь второй этаж, вернись по лестнице вниз или закрой оставшиеся диалоги."
+        "Когда закончишь второй этаж, поднимайся на третий: там актовый зал, право и языковые кабинеты."
     ],
     "ci-curator": [
         "Преподавательская помогает маршруту ощущаться живым: здесь координируют занятия и проекты.",
         "Второй этаж теперь работает как учебный блок с кабинетами, лабораториями и людьми.",
-        "Если все зоны и разговоры закрыты, игра покажет итог прохождения."
+        "После второго этажа маршрут продолжается выше: третий и четвертый уровни теперь тоже часть игры."
+    ],
+    "ci-stage": [
+        "Третий этаж начинается с актового зала. Здесь проходят защиты, встречи и большие события колледжа.",
+        "Важно, что рядом есть библиотека, лингафонные кабинеты и имитационные пространства: этаж работает как общественно-гуманитарный блок.",
+        "После зала осмотри гостиничную и судебную зоны, чтобы увидеть разные профессиональные сценарии."
+    ],
+    "ci-legal": [
+        "Судебная имитационная аудитория помогает тренировать речь, аргументацию и работу с документами.",
+        "Юридические кабинеты лучше показывать через действие: роли, кейсы, защита позиции и разбор ситуации.",
+        "На этом этаже маршрут становится спокойнее, но содержательно плотнее."
+    ],
+    "ci-hotel": [
+        "Гостиничная имитационная зона нужна для практики сервиса, коммуникации и работы с гостями.",
+        "Такие кабинеты удобно размещать рядом с гуманитарными и языковыми аудиториями.",
+        "Попробуй открыть описание каждой зоны: там подсвечивается назначение помещения."
+    ],
+    "ci-language": [
+        "Лингафонный кабинет показывает, что современный колледж должен тренировать не только профессию, но и коммуникацию.",
+        "Здесь можно проводить диалоги, аудирование, презентации и подготовку к собеседованиям.",
+        "Когда третий этаж будет изучен, лестница поведёт на верхний IT-уровень."
+    ],
+    "ci-admin3": [
+        "Административная зона третьего этажа помогает координировать мероприятия, библиотеку и учебные кабинеты.",
+        "В маршруте она нужна как точка управления: здесь понятно, кто отвечает за события и расписание.",
+        "Дальше стоит подняться на четвертый этаж, где собраны IT-лаборатории и управление."
+    ],
+    "ci-it-lead": [
+        "Четвертый этаж сделан как сильный IT-блок: большие лаборатории, командная разработка и серверная рядом.",
+        "Здесь удобно показывать полный цикл: задача, код, тестирование, защита и демонстрация результата.",
+        "Если обойдешь все кабинеты, игра отметит верхний уровень как завершенный."
+    ],
+    "ci-server": [
+        "Серверная - техническое сердце этажа. Она объясняет, где живут сети, сервисы и инфраструктура.",
+        "В реальном колледже такая зона требует доступа, охлаждения и понятной ответственности.",
+        "Рядом с серверной логично размещать большие компьютерные классы."
+    ],
+    "ci-director": [
+        "Директорский блок на верхнем этаже показывает управленческую часть колледжа.",
+        "Для тура это важная точка: посетитель видит не только классы, но и структуру управления.",
+        "После кабинетов администрации проверь конференц-зал и тихую зону."
+    ],
+    "ci-accounting": [
+        "Бухгалтерия и административные кабинеты отвечают за документы, процессы и поддержку учебной среды.",
+        "Такие зоны не самые зрелищные, но они делают модель колледжа полной и реалистичной.",
+        "Закрой оставшиеся точки на четвертом этаже, чтобы завершить маршрут."
+    ],
+    "ci-conference4": [
+        "Конференц-зал нужен для совещаний, защит проектов и встреч с партнерами.",
+        "На четвертом этаже он связывает IT-блок и администрацию в одну рабочую систему.",
+        "Если все люди найдены и все зоны изучены, тур завершится автоматически."
     ]
 };
 
@@ -1544,6 +1594,7 @@ if (window.matchMedia("(max-width: 760px), (hover: none) and (pointer: coarse)")
     setPanelCollapsed(statsPanel, statsToggle, true);
     setPanelCollapsed(questsPanel, questsToggle, true);
     setPanelCollapsed(detailPanel, detailToggle, true);
+    setPanelCollapsed(minimapPanel, minimapToggle, true);
 }
 
 function getOutdoorLayout() {
@@ -1590,6 +1641,95 @@ function getIndoorLayout(floor = state.floor || 1) {
     const centerX = gameCanvas.width / 2;
     const margin = 72 * s;
 
+    if (floor === 4) {
+        const serverRoom = rect(centerX - 112 * s, 70 * s, 224 * s, 96 * s);
+        const itLabA = rect(margin, 92 * s, 266 * s, 130 * s);
+        const itLabB = rect(margin, 250 * s, 266 * s, 122 * s);
+        const director = rect(gameCanvas.width - margin - 246 * s, 92 * s, 246 * s, 118 * s);
+        const accounting = rect(gameCanvas.width - margin - 246 * s, 238 * s, 246 * s, 118 * s);
+        const conference4 = rect(gameCanvas.width - margin - 246 * s, 384 * s, 246 * s, 118 * s);
+        const devHub = rect(centerX - 218 * s, 198 * s, 436 * s, 132 * s);
+        const quietLounge = rect(centerX - 220 * s, gameCanvas.height - 176 * s, 440 * s, 104 * s);
+        const downZone = rect(centerX - 70 * s, gameCanvas.height - 58 * s, 140 * s, 28 * s);
+
+        const rooms = [
+            { area: serverRoom, fill: "#d8e4ef", label: "Серверная", desks: [4, 2, "#6f8398"] },
+            { area: itLabA, fill: "#d8eaf7", label: "Большая IT-лаба", desks: [5, 3, "#6e9ccb"] },
+            { area: itLabB, fill: "#dbe7f4", label: "Класс разработчиков", desks: [4, 3, "#7192ba"] },
+            { area: director, fill: "#e7dfd2", label: "Директор", desks: [2, 2, "#b38b61"] },
+            { area: accounting, fill: "#e4e0d7", label: "Бухгалтерия", desks: [3, 2, "#a98963"] },
+            { area: conference4, fill: "#dce6e1", label: "Конференц-зал", desks: [3, 2, "#88a895"] },
+            { area: quietLounge, fill: "#d9e3e0", label: "Тихая зона", desks: [5, 2, "#89a692"] }
+        ];
+
+        const hotspots = [
+            { id: "i-floor4-server", name: "Серверная", tag: "IT-инфраструктура", description: "Техническая зона для сетей, сервисов, хранения данных и демонстрации цифровой инфраструктуры колледжа.", area: serverRoom, points: 18 },
+            { id: "i-floor4-itlab", name: "Большая IT-лаборатория", tag: "IT", description: "Просторный компьютерный класс для командной разработки, тестирования и защиты цифровых проектов.", area: itLabA, points: 18 },
+            { id: "i-floor4-dev", name: "Класс разработчиков", tag: "Разработка", description: "Учебная аудитория для веб-продуктов, приложений, интерфейсов и практики программирования.", area: itLabB, points: 16 },
+            { id: "i-floor4-director", name: "Кабинет директора", tag: "Управление", description: "Административная точка верхнего этажа, где показана управленческая часть колледжа.", area: director, points: 14 },
+            { id: "i-floor4-accounting", name: "Бухгалтерия", tag: "Администрация", description: "Рабочая зона для документов, процессов и поддержки повседневной жизни колледжа.", area: accounting, points: 14 },
+            { id: "i-floor4-conference", name: "Конференц-зал", tag: "Встречи", description: "Помещение для совещаний, партнерских встреч, презентаций и защит проектов.", area: conference4, points: 16 },
+            { id: "i-floor4-devhub", name: "Центр разработки", tag: "Команды", description: "Открытая проектная зона между лабораториями и административным блоком для коротких командных сессий.", area: devHub, points: 16 },
+            { id: "i-floor4-lounge", name: "Тихая зона отдыха", tag: "Пауза", description: "Спокойный участок коридора для индивидуальной работы, отдыха и подготовки перед защитой.", area: quietLounge, points: 14 }
+        ];
+
+        const npcs = [
+            { id: "ci-it-lead", name: "Руслан", role: "руководитель IT-блока", tag: "Персонаж 4 этажа", description: "Он показывает большие лаборатории и объясняет, как устроены командные цифровые проекты.", dialogue: "Четвертый этаж сделан как сильный IT-блок: большие лаборатории, командная разработка и серверная рядом.", x: itLabA.x + 66 * s, y: itLabA.y + 62 * s, scale: 0.98, points: 9, talkPoints: 7, palette: { shirt: "#2c6eea", pants: "#263d63", accent: "#79f0ca", hair: "#2b2531", skin: "#efc6a2" } },
+            { id: "ci-server", name: "Арман", role: "системный администратор", tag: "Персонаж 4 этажа", description: "Он отвечает за серверную, сети и техническую инфраструктуру цифрового этажа.", dialogue: "Серверная - техническое сердце этажа. Она объясняет, где живут сети, сервисы и инфраструктура.", x: serverRoom.x + serverRoom.w - 74 * s, y: serverRoom.y + 42 * s, scale: 0.96, points: 9, talkPoints: 7, palette: { shirt: "#5967e8", pants: "#2c315b", accent: "#ffd36e", hair: "#362c28", skin: "#efc3a0" } },
+            { id: "ci-director", name: "Айгуль", role: "директор колледжа", tag: "Персонаж 4 этажа", description: "Она связывает учебные направления, партнеров и стратегию развития колледжа.", dialogue: "Директорский блок на верхнем этаже показывает управленческую часть колледжа.", x: director.x + 58 * s, y: director.y + 54 * s, scale: 0.98, points: 9, talkPoints: 7, palette: { shirt: "#d18443", pants: "#59433a", accent: "#79f0ca", hair: "#40302a", skin: "#f1c8a6" } },
+            { id: "ci-accounting", name: "Жанна", role: "администратор процессов", tag: "Персонаж 4 этажа", description: "Она показывает документы, расписания и поддержку административной работы.", dialogue: "Бухгалтерия и административные кабинеты отвечают за документы, процессы и поддержку учебной среды.", x: accounting.x + accounting.w - 76 * s, y: accounting.y + 52 * s, scale: 0.96, points: 9, talkPoints: 7, palette: { shirt: "#4aa37e", pants: "#344f49", accent: "#ffffff", hair: "#2f2b28", skin: "#edc29a" } },
+            { id: "ci-conference4", name: "Ербол", role: "координатор конференций", tag: "Персонаж 4 этажа", description: "Он отвечает за встречи, защиты проектов и работу с партнерами колледжа.", dialogue: "Конференц-зал нужен для совещаний, защит проектов и встреч с партнерами.", x: conference4.x + 70 * s, y: conference4.y + 54 * s, scale: 0.96, points: 9, talkPoints: 7, palette: { shirt: "#9a63d8", pants: "#483c68", accent: "#79f0ca", hair: "#332637", skin: "#edc29a" } }
+        ];
+
+        return { sceneName: "Главный корпус, 4 этаж", floor: 4, s, serverRoom, itLabA, itLabB, director, accounting, conference4, devHub, quietLounge, downZone, rooms, halls: [devHub], blockers: [], hotspots, npcs };
+    }
+
+    if (floor === 3) {
+        const eventHall = rect(centerX - 210 * s, 62 * s, 420 * s, 150 * s);
+        const library3 = rect(margin, 86 * s, 248 * s, 122 * s);
+        const hotel = rect(margin, 236 * s, 248 * s, 118 * s);
+        const languageLab = rect(margin, 382 * s, 248 * s, 118 * s);
+        const courtroom = rect(gameCanvas.width - margin - 248 * s, 86 * s, 248 * s, 122 * s);
+        const lawClass = rect(gameCanvas.width - margin - 248 * s, 236 * s, 248 * s, 118 * s);
+        const adminHub = rect(gameCanvas.width - margin - 248 * s, 382 * s, 248 * s, 118 * s);
+        const eventBackstage = rect(centerX - 190 * s, 246 * s, 380 * s, 104 * s);
+        const studentLounge = rect(centerX - 220 * s, gameCanvas.height - 176 * s, 440 * s, 104 * s);
+        const downZone = rect(centerX - 154 * s, gameCanvas.height - 58 * s, 128 * s, 28 * s);
+        const upZone = rect(centerX + 26 * s, gameCanvas.height - 58 * s, 128 * s, 28 * s);
+
+        const rooms = [
+            { area: eventHall, fill: "#e9d9dd", label: "Актовый зал", desks: [6, 3, "#b97983"] },
+            { area: library3, fill: "#e7e2d6", label: "Библиотека", desks: [3, 3, "#a98963"] },
+            { area: hotel, fill: "#e6ddd1", label: "Гостиничная зона", desks: [3, 2, "#b68758"] },
+            { area: languageLab, fill: "#dce8ef", label: "Лингафонный кабинет", desks: [4, 2, "#7f9eb8"] },
+            { area: courtroom, fill: "#e5ddd4", label: "Судебная аудитория", desks: [3, 2, "#aa8461"] },
+            { area: lawClass, fill: "#dedfea", label: "Юридический кабинет", desks: [4, 2, "#858bb4"] },
+            { area: adminHub, fill: "#dce6e1", label: "Администрация", desks: [3, 2, "#88a895"] },
+            { area: studentLounge, fill: "#d9e3e0", label: "Студенческий холл", desks: [5, 2, "#89a692"] }
+        ];
+
+        const hotspots = [
+            { id: "i-floor3-auditorium", name: "Актовый зал", tag: "События", description: "Крупное пространство для мероприятий, защит проектов, встреч с гостями и внутренних событий колледжа.", area: eventHall, points: 18 },
+            { id: "i-floor3-library", name: "Библиотека третьего этажа", tag: "Учёба", description: "Тихая зона для чтения, подготовки докладов и работы с источниками перед защитами.", area: library3, points: 16 },
+            { id: "i-floor3-hotel", name: "Имитация гостиницы", tag: "Практика", description: "Учебный кабинет для сценариев сервиса, общения с гостями и профессиональных ролевых задач.", area: hotel, points: 16 },
+            { id: "i-floor3-language", name: "Лингафонный кабинет", tag: "Коммуникация", description: "Кабинет для языковой практики, аудирования, презентаций и подготовки к собеседованиям.", area: languageLab, points: 16 },
+            { id: "i-floor3-court", name: "Судебная аудитория", tag: "Право", description: "Имитационная среда для юридических кейсов, аргументации, публичной речи и разборов ситуаций.", area: courtroom, points: 18 },
+            { id: "i-floor3-law", name: "Юридический кабинет", tag: "Право", description: "Аудитория для теории права, документов, консультаций и подготовки к учебным процессам.", area: lawClass, points: 16 },
+            { id: "i-floor3-admin", name: "Административный блок", tag: "Координация", description: "Рабочий участок для координации событий, расписания, библиотеки и учебных помещений этажа.", area: adminHub, points: 14 },
+            { id: "i-floor3-lounge", name: "Студенческий холл", tag: "Пауза", description: "Общая зона третьего этажа, где удобно собраться перед мероприятием или защитой.", area: studentLounge, points: 14 }
+        ];
+
+        const npcs = [
+            { id: "ci-stage", name: "Мадина", role: "организатор мероприятий", tag: "Персонаж 3 этажа", description: "Она отвечает за актовый зал, защиты, встречи и публичные события колледжа.", dialogue: "Третий этаж начинается с актового зала. Здесь проходят защиты, встречи и большие события колледжа.", x: eventHall.x + eventHall.w / 2 - 12 * s, y: eventHall.y + 70 * s, scale: 0.98, points: 9, talkPoints: 7, palette: { shirt: "#d18443", pants: "#59433a", accent: "#79f0ca", hair: "#40302a", skin: "#f1c8a6" } },
+            { id: "ci-legal", name: "Елена", role: "преподаватель права", tag: "Персонаж 3 этажа", description: "Она показывает судебную аудиторию и объясняет, как проходят учебные кейсы.", dialogue: "Судебная имитационная аудитория помогает тренировать речь, аргументацию и работу с документами.", x: courtroom.x + 62 * s, y: courtroom.y + 56 * s, scale: 0.98, points: 9, talkPoints: 7, palette: { shirt: "#5967e8", pants: "#2c315b", accent: "#ffd36e", hair: "#3a2a23", skin: "#efc3a0" } },
+            { id: "ci-hotel", name: "Самат", role: "наставник сервиса", tag: "Персонаж 3 этажа", description: "Он знакомит с гостиничной имитационной зоной и практикой клиентского общения.", dialogue: "Гостиничная имитационная зона нужна для практики сервиса, коммуникации и работы с гостями.", x: hotel.x + hotel.w - 76 * s, y: hotel.y + 54 * s, scale: 0.96, points: 9, talkPoints: 7, palette: { shirt: "#4aa37e", pants: "#344f49", accent: "#ffffff", hair: "#2f2b28", skin: "#edc29a" } },
+            { id: "ci-language", name: "Лаура", role: "преподаватель коммуникаций", tag: "Персонаж 3 этажа", description: "Она показывает лингафонный кабинет и объясняет роль языковой практики.", dialogue: "Лингафонный кабинет показывает, что современный колледж должен тренировать не только профессию, но и коммуникацию.", x: languageLab.x + 64 * s, y: languageLab.y + 54 * s, scale: 0.96, points: 9, talkPoints: 7, palette: { shirt: "#9a63d8", pants: "#483c68", accent: "#79f0ca", hair: "#332637", skin: "#edc29a" } },
+            { id: "ci-admin3", name: "Роман", role: "координатор этажа", tag: "Персонаж 3 этажа", description: "Он связывает административный блок, библиотеку и расписание мероприятий третьего этажа.", dialogue: "Административная зона третьего этажа помогает координировать мероприятия, библиотеку и учебные кабинеты.", x: adminHub.x + adminHub.w - 76 * s, y: adminHub.y + 54 * s, scale: 0.96, points: 9, talkPoints: 7, palette: { shirt: "#2c6eea", pants: "#263d63", accent: "#79f0ca", hair: "#2b2531", skin: "#efc6a2" } }
+        ];
+
+        return { sceneName: "Главный корпус, 3 этаж", floor: 3, s, eventHall, library3, hotel, languageLab, courtroom, lawClass, adminHub, eventBackstage, studentLounge, downZone, upZone, rooms, halls: [eventBackstage, studentLounge], blockers: [], hotspots, npcs };
+    }
+
     if (floor === 2) {
         const secondHall = rect(centerX - 230 * s, 44 * s, 460 * s, 70 * s);
         const programming = rect(margin, 92 * s, 244 * s, 120 * s);
@@ -1602,7 +1742,8 @@ function getIndoorLayout(floor = state.floor || 1) {
         const projectHall = rect(centerX - 200 * s, 372 * s, 400 * s, 96 * s);
         const teachers = rect(centerX - 220 * s, gameCanvas.height - 168 * s, 200 * s, 104 * s);
         const meeting = rect(centerX + 20 * s, gameCanvas.height - 168 * s, 200 * s, 104 * s);
-        const downZone = rect(centerX - 70 * s, gameCanvas.height - 56 * s, 140 * s, 28 * s);
+        const downZone = rect(centerX - 154 * s, gameCanvas.height - 56 * s, 128 * s, 28 * s);
+        const upZone = rect(centerX + 26 * s, gameCanvas.height - 56 * s, 128 * s, 28 * s);
 
         const rooms = [
             { area: secondHall, fill: "#d4dce6", label: "Галерея 2 этажа" },
@@ -1636,7 +1777,7 @@ function getIndoorLayout(floor = state.floor || 1) {
             { id: "ci-curator", name: "Оксана", role: "старший куратор", tag: "Персонаж 2 этажа", description: "Она координирует расписание, консультации и проектные активности преподавателей.", dialogue: "Преподавательская помогает маршруту ощущаться живым: здесь координируют занятия и проекты.", x: teachers.x + teachers.w - 70 * s, y: teachers.y + 50 * s, scale: 0.98, points: 9, talkPoints: 7, palette: { shirt: "#d18443", pants: "#59433a", accent: "#79f0ca", hair: "#40302a", skin: "#f1c8a6" } }
         ];
 
-        return { sceneName: "Главный корпус, 2 этаж", floor: 2, s, secondHall, programming, cyber, media, science, physics, lecture, balcony, projectHall, teachers, meeting, downZone, rooms, halls: [balcony, projectHall], blockers: [], hotspots, npcs };
+        return { sceneName: "Главный корпус, 2 этаж", floor: 2, s, secondHall, programming, cyber, media, science, physics, lecture, balcony, projectHall, teachers, meeting, downZone, upZone, rooms, halls: [balcony, projectHall], blockers: [], hotspots, npcs };
     }
 
     const conference = rect(centerX - 220 * s, 34 * s, 440 * s, 60 * s);
@@ -1738,7 +1879,19 @@ function showMessage(text) {
 }
 
 function indoorLayouts() {
-    return [getIndoorLayout(1), getIndoorLayout(2)];
+    return [1, 2, 3, 4].map((floor) => getIndoorLayout(floor));
+}
+
+function floorName(floor) {
+    return ["", "первый", "второй", "третий", "четвертый"][floor] || `${floor}`;
+}
+
+function floorNameAccusative(floor) {
+    return ["", "первый", "второй", "третий", "четвертый"][floor] || `${floor}`;
+}
+
+function floorNameGenitive(floor) {
+    return ["", "первого", "второго", "третьего", "четвертого"][floor] || `${floor}`;
 }
 
 function totalIndoorHotspots() {
@@ -1842,12 +1995,12 @@ function updateInteraction(layout) {
     }
 
     if (state.inside && layout.upZone && intersects(current, layout.upZone)) {
-        state.interactionTarget = { type: "upstairs", label: "подняться на второй этаж" };
+        state.interactionTarget = { type: "upstairs", label: `подняться на ${floorNameAccusative(state.floor + 1)} этаж` };
         return;
     }
 
     if (state.inside && layout.downZone && intersects(current, layout.downZone)) {
-        state.interactionTarget = { type: "downstairs", label: "спуститься на первый этаж" };
+        state.interactionTarget = { type: "downstairs", label: `спуститься на ${floorNameAccusative(state.floor - 1)} этаж` };
         return;
     }
 
@@ -1891,12 +2044,7 @@ function nearestTarget(items, getPoint) {
 function currentObjectiveTarget(layout) {
     const outsideZones = countSetByPrefix(state.visitedHotspots, "o-");
     const outdoorTalks = countSetByPrefix(state.spokenNpcs, "co-");
-    const firstFloor = getIndoorLayout(1);
-    const secondFloor = getIndoorLayout(2);
-    const firstFloorZones = countVisitedInLayout(firstFloor);
-    const secondFloorZones = countVisitedInLayout(secondFloor);
-    const firstFloorTalks = countSpokenInLayout(firstFloor);
-    const secondFloorTalks = countSpokenInLayout(secondFloor);
+    const indoorLayoutList = indoorLayouts();
     const unvisitedHotspots = layout.hotspots.filter((hotspot) => !state.visitedHotspots.has(hotspot.id));
     const unspokenNpcs = layout.npcs.filter((npc) => !state.spokenNpcs.has(npc.id));
 
@@ -1922,28 +2070,44 @@ function currentObjectiveTarget(layout) {
         return { ...areaCenter(layout.entryZone), label: "Вход в корпус", type: "Переход", color: "#79f0ca" };
     }
 
-    if (state.floor === 1 && firstFloorZones < firstFloor.hotspots.length) {
+    if (unvisitedHotspots.length > 0) {
         return nearestHotspot() || nearestNpc();
     }
 
-    if (state.floor === 1 && firstFloorTalks < Math.min(3, firstFloor.npcs.length)) {
+    if (unspokenNpcs.length > 0) {
         return nearestNpc() || nearestHotspot();
     }
 
-    if (state.floor === 1 && secondFloorZones < secondFloor.hotspots.length) {
-        return { ...areaCenter(layout.upZone), label: "Лестница на 2 этаж", type: "Переход", color: "#79f0ca" };
+    const nextUnvisitedFloor = indoorLayoutList.find(
+        (floorLayout) => floorLayout.floor > state.floor && countVisitedInLayout(floorLayout) < floorLayout.hotspots.length
+    );
+
+    if (nextUnvisitedFloor && layout.upZone) {
+        return { ...areaCenter(layout.upZone), label: `Лестница на ${state.floor + 1} этаж`, type: "Переход", color: "#79f0ca" };
     }
 
-    if (state.floor === 2 && secondFloorZones < secondFloor.hotspots.length) {
-        return nearestHotspot() || nearestNpc();
+    const previousUnvisitedFloor = [...indoorLayoutList]
+        .reverse()
+        .find((floorLayout) => floorLayout.floor < state.floor && countVisitedInLayout(floorLayout) < floorLayout.hotspots.length);
+
+    if (previousUnvisitedFloor && layout.downZone) {
+        return { ...areaCenter(layout.downZone), label: `Лестница на ${state.floor - 1} этаж`, type: "Переход", color: "#79f0ca" };
     }
 
-    if (state.floor === 2 && secondFloorTalks < secondFloor.npcs.length) {
-        return nearestNpc() || nearestHotspot();
+    const nextUnspokenFloor = indoorLayoutList.find(
+        (floorLayout) => floorLayout.floor > state.floor && countSpokenInLayout(floorLayout) < floorLayout.npcs.length
+    );
+
+    if (nextUnspokenFloor && layout.upZone) {
+        return { ...areaCenter(layout.upZone), label: `Лестница на ${state.floor + 1} этаж`, type: "Переход", color: "#79f0ca" };
     }
 
-    if (state.floor === 2 && countSpokenInLayout(firstFloor) < firstFloor.npcs.length) {
-        return { ...areaCenter(layout.downZone), label: "Лестница на 1 этаж", type: "Переход", color: "#79f0ca" };
+    const previousUnspokenFloor = [...indoorLayoutList]
+        .reverse()
+        .find((floorLayout) => floorLayout.floor < state.floor && countSpokenInLayout(floorLayout) < floorLayout.npcs.length);
+
+    if (previousUnspokenFloor && layout.downZone) {
+        return { ...areaCenter(layout.downZone), label: `Лестница на ${state.floor - 1} этаж`, type: "Переход", color: "#79f0ca" };
     }
 
     return nearestHotspot() || nearestNpc();
@@ -2054,7 +2218,17 @@ function portraitProfileFor(npc) {
         "ci-cyber": { hair: "bob", mouth: "confident", accessory: "glasses" },
         "ci-chemist": { hair: "long", mouth: "calm", accessory: "leaf" },
         "ci-media": { hair: "cap", mouth: "smile", accessory: "cup" },
-        "ci-curator": { hair: "bob", mouth: "smile", accessory: "book" }
+        "ci-curator": { hair: "bob", mouth: "smile", accessory: "book" },
+        "ci-stage": { hair: "bob", mouth: "smile", accessory: "pin" },
+        "ci-legal": { hair: "long", mouth: "confident", accessory: "book" },
+        "ci-hotel": { hair: "short", mouth: "smile", accessory: "cup" },
+        "ci-language": { hair: "long", mouth: "calm", accessory: "book" },
+        "ci-admin3": { hair: "short", mouth: "confident", accessory: "badge" },
+        "ci-it-lead": { hair: "short", mouth: "confident", accessory: "glasses" },
+        "ci-server": { hair: "cap", mouth: "calm", accessory: "glasses" },
+        "ci-director": { hair: "bob", mouth: "confident", accessory: "badge" },
+        "ci-accounting": { hair: "short", mouth: "calm", accessory: "book" },
+        "ci-conference4": { hair: "cap", mouth: "smile", accessory: "pin" }
     };
 
     return profiles[npc.id] || { hair: "short", mouth: "smile", accessory: "pin" };
@@ -2429,19 +2603,22 @@ function handleAction() {
             placePlayerInside();
             showMessage("Открыт внутренний маршрут корпуса.");
         } else if (state.interactionTarget.type === "upstairs") {
-            state.floor = 2;
-            const second = getIndoorLayout(2);
-            player.x = second.downZone.x + second.downZone.w / 2 - player.size / 2;
-            player.y = second.downZone.y - 42 * second.s;
+            const nextFloor = Math.min(4, state.floor + 1);
+            state.floor = nextFloor;
+            const next = getIndoorLayout(nextFloor);
+            player.x = next.downZone.x + next.downZone.w / 2 - player.size / 2;
+            player.y = next.downZone.y - 42 * next.s;
             clampPlayer();
-            showMessage("Ты поднялся на второй этаж. Открыты новые кабинеты и персонажи.");
+            showMessage(`Ты поднялся на ${floorNameAccusative(nextFloor)} этаж. Открыты новые кабинеты и персонажи.`);
         } else if (state.interactionTarget.type === "downstairs") {
-            state.floor = 1;
-            const first = getIndoorLayout(1);
-            player.x = first.upZone.x + first.upZone.w / 2 - player.size / 2;
-            player.y = first.upZone.y + first.upZone.h + 18 * first.s;
+            const previousFloor = Math.max(1, state.floor - 1);
+            state.floor = previousFloor;
+            const previous = getIndoorLayout(previousFloor);
+            const arrivalZone = previous.upZone || previous.exitZone || previous.downZone;
+            player.x = arrivalZone.x + arrivalZone.w / 2 - player.size / 2;
+            player.y = arrivalZone.y + arrivalZone.h + 18 * previous.s;
             clampPlayer();
-            showMessage("Ты вернулся на первый этаж.");
+            showMessage(`Ты спустился на ${floorNameAccusative(previousFloor)} этаж.`);
         } else {
             state.inside = false;
             state.floor = 1;
@@ -2493,9 +2670,13 @@ function taskData() {
     const outdoorTalks = countSetByPrefix(state.spokenNpcs, "co-");
     const firstFloor = getIndoorLayout(1);
     const secondFloor = getIndoorLayout(2);
+    const thirdFloor = getIndoorLayout(3);
+    const fourthFloor = getIndoorLayout(4);
     const firstFloorZones = countVisitedInLayout(firstFloor);
     const secondFloorZones = countVisitedInLayout(secondFloor);
-    const indoorZones = firstFloorZones + secondFloorZones;
+    const thirdFloorZones = countVisitedInLayout(thirdFloor);
+    const fourthFloorZones = countVisitedInLayout(fourthFloor);
+    const indoorZones = firstFloorZones + secondFloorZones + thirdFloorZones + fourthFloorZones;
     const indoorTalks = countSetByPrefix(state.spokenNpcs, "ci-");
 
     return [
@@ -2503,8 +2684,12 @@ function taskData() {
         { title: "Поговорить с 2 людьми на кампусе", done: outdoorTalks >= 2, meta: `${Math.min(outdoorTalks, 2)} / 2` },
         { title: "Войти в главный корпус", done: state.inside || indoorZones > 0, meta: state.inside || indoorZones > 0 ? "выполнено" : "нужно подойти ко входу" },
         { title: "Изучить кабинеты 1 этажа", done: firstFloorZones >= firstFloor.hotspots.length, meta: `${firstFloorZones} / ${firstFloor.hotspots.length}` },
-        { title: "Подняться на второй этаж", done: state.floor === 2 || secondFloorZones > 0, meta: state.floor === 2 || secondFloorZones > 0 ? "этаж открыт" : "найди лестницу в атриуме" },
+        { title: "Подняться на второй этаж", done: state.floor >= 2 || secondFloorZones > 0, meta: state.floor >= 2 || secondFloorZones > 0 ? "этаж открыт" : "найди лестницу в атриуме" },
         { title: "Изучить кабинеты 2 этажа", done: secondFloorZones >= secondFloor.hotspots.length, meta: `${secondFloorZones} / ${secondFloor.hotspots.length}` },
+        { title: "Подняться на третий этаж", done: state.floor >= 3 || thirdFloorZones > 0, meta: state.floor >= 3 || thirdFloorZones > 0 ? "этаж открыт" : "лестница на втором этаже" },
+        { title: "Изучить кабинеты 3 этажа", done: thirdFloorZones >= thirdFloor.hotspots.length, meta: `${thirdFloorZones} / ${thirdFloor.hotspots.length}` },
+        { title: "Подняться на четвертый этаж", done: state.floor === 4 || fourthFloorZones > 0, meta: state.floor === 4 || fourthFloorZones > 0 ? "этаж открыт" : "лестница на третьем этаже" },
+        { title: "Изучить кабинеты 4 этажа", done: fourthFloorZones >= fourthFloor.hotspots.length, meta: `${fourthFloorZones} / ${fourthFloor.hotspots.length}` },
         { title: "Поговорить с людьми внутри", done: indoorTalks >= totalIndoorNpcs(), meta: `${indoorTalks} / ${totalIndoorNpcs()}` },
         { title: "Закрыть полный тур", done: isTourComplete(), meta: `${state.visitedHotspots.size}/${totalHotspots()} зон, ${state.foundNpcs.size}/${totalNpcs()} людей` }
     ];
@@ -2513,10 +2698,9 @@ function taskData() {
 function missionText() {
     const outsideZones = countSetByPrefix(state.visitedHotspots, "o-");
     const outdoorTalks = countSetByPrefix(state.spokenNpcs, "co-");
-    const firstFloor = getIndoorLayout(1);
-    const secondFloor = getIndoorLayout(2);
-    const firstFloorZones = countVisitedInLayout(firstFloor);
-    const secondFloorZones = countVisitedInLayout(secondFloor);
+    const indoorLayoutList = indoorLayouts();
+    const currentFloorLayout = state.inside ? getIndoorLayout(state.floor) : null;
+    const currentFloorZones = currentFloorLayout ? countVisitedInLayout(currentFloorLayout) : 0;
     const indoorTalks = countSetByPrefix(state.spokenNpcs, "ci-");
 
     if (!state.inside && outsideZones < 4) {
@@ -2531,20 +2715,24 @@ function missionText() {
         return "Подойти ко входу и перейти внутрь";
     }
 
-    if (state.floor === 2 && secondFloorZones < secondFloor.hotspots.length) {
-        return "Изучить кабинеты второго этажа";
+    if (currentFloorLayout && currentFloorZones < currentFloorLayout.hotspots.length) {
+        return `Изучить кабинеты ${floorNameGenitive(state.floor)} этажа`;
     }
 
-    if (firstFloorZones < firstFloor.hotspots.length) {
-        return "Изучить кабинеты первого этажа";
+    const nextUnvisitedFloor = indoorLayoutList.find(
+        (floorLayout) => floorLayout.floor > state.floor && countVisitedInLayout(floorLayout) < floorLayout.hotspots.length
+    );
+
+    if (nextUnvisitedFloor) {
+        return `Найти лестницу и подняться на ${floorNameAccusative(state.floor + 1)} этаж`;
     }
 
-    if (state.floor === 1 && secondFloorZones === 0) {
-        return "Найти лестницу и подняться на второй этаж";
-    }
+    const previousUnvisitedFloor = [...indoorLayoutList]
+        .reverse()
+        .find((floorLayout) => floorLayout.floor < state.floor && countVisitedInLayout(floorLayout) < floorLayout.hotspots.length);
 
-    if (secondFloorZones < secondFloor.hotspots.length) {
-        return "Вернуться на второй этаж и закрыть кабинеты";
+    if (previousUnvisitedFloor) {
+        return `Спуститься на ${floorNameAccusative(state.floor - 1)} этаж и закрыть кабинеты`;
     }
 
     if (indoorTalks < totalIndoorNpcs()) {
@@ -2559,8 +2747,12 @@ function tutorialStepText() {
     const outdoorTalks = countSetByPrefix(state.spokenNpcs, "co-");
     const firstFloor = getIndoorLayout(1);
     const secondFloor = getIndoorLayout(2);
+    const thirdFloor = getIndoorLayout(3);
+    const fourthFloor = getIndoorLayout(4);
     const firstFloorZones = countVisitedInLayout(firstFloor);
     const secondFloorZones = countVisitedInLayout(secondFloor);
+    const thirdFloorZones = countVisitedInLayout(thirdFloor);
+    const fourthFloorZones = countVisitedInLayout(fourthFloor);
 
     if (!state.inside && outsideZones < 3) {
         return "Шаг 1. Осмотри уличные зоны нового кампуса.";
@@ -2582,7 +2774,15 @@ function tutorialStepText() {
         return "Шаг 5. Поднимись на второй этаж и изучи новые кабинеты.";
     }
 
-    return "Шаг 6. Поговори со всеми персонажами и заверши полный маршрут.";
+    if (thirdFloorZones < thirdFloor.hotspots.length) {
+        return "Шаг 6. Поднимись на третий этаж: актовый зал, право, языки и сервис.";
+    }
+
+    if (fourthFloorZones < fourthFloor.hotspots.length) {
+        return "Шаг 7. Поднимись на четвертый этаж и закрой IT-блок с администрацией.";
+    }
+
+    return "Шаг 8. Поговори со всеми персонажами и заверши полный маршрут.";
 }
 
 function currentHint() {
@@ -2613,7 +2813,7 @@ function currentHint() {
     }
 
     return state.inside
-        ? "Внутри корпуса двигайся стрелками, WASD, D-pad или нижним ползунком: изучи 1 этаж, найди лестницу и поднимись выше."
+        ? "Внутри корпуса двигайся стрелками, WASD, D-pad или нижним ползунком: изучай этажи, ищи лестницы и поднимайся до 4 этажа."
         : "На улице используй стрелки, WASD, D-pad или нижний ползунок: площадь, бульвар, сад, амфитеатр и спортзона.";
 }
 
@@ -2625,7 +2825,7 @@ function updateUi() {
     const routePercent = Math.round((state.visitedHotspots.size / totalHotspots()) * 100);
 
     sceneLabel.textContent = state.inside ? `Главный корпус, ${state.floor} этаж` : "Кампус";
-    zoneLabel.textContent = activeNpc ? activeNpc.name : activeHotspot ? activeHotspot.name : state.inside ? state.floor === 2 ? "Галерея 2 этажа" : "Атриум" : "Стартовая площадь";
+    zoneLabel.textContent = activeNpc ? activeNpc.name : activeHotspot ? activeHotspot.name : state.inside ? state.floor === 1 ? "Атриум" : `Галерея ${state.floor} этажа` : "Стартовая площадь";
     routeLabel.textContent = `${state.visitedHotspots.size} / ${totalHotspots()}`;
     npcLabel.textContent = `${state.foundNpcs.size} / ${totalNpcs()}`;
     talkLabel.textContent = `${state.spokenNpcs.size} / ${totalNpcs()}`;
@@ -2645,8 +2845,8 @@ function updateUi() {
         detailTag.textContent = activeHotspot.tag;
     } else {
         detailTitle.textContent = "Новый проект";
-        detailText.textContent = "Маршрут теперь включает уличные зоны, первый этаж, второй этаж, новые кабинеты, персонажей и лестничный переход.";
-        detailTag.textContent = "Концепция: кампус + 2 этажа";
+        detailText.textContent = "Маршрут теперь включает уличные зоны, четыре этажа корпуса, новые кабинеты, персонажей и лестничные переходы.";
+        detailTag.textContent = "Концепция: кампус + 4 этажа";
     }
 
     questList.innerHTML = taskData().map((task) => `
@@ -2792,7 +2992,17 @@ function npcIconProfile(npc) {
         "ci-cyber": { type: "gear", label: "SEC", color: "#ffd36e" },
         "ci-chemist": { type: "leaf", label: "SCI", color: "#9fe07e" },
         "ci-media": { type: "cup", label: "MEDIA", color: "#d8a7ff" },
-        "ci-curator": { type: "book", label: "CUR", color: "#f1b36b" }
+        "ci-curator": { type: "book", label: "CUR", color: "#f1b36b" },
+        "ci-stage": { type: "info", label: "EVENT", color: "#ff9a7c" },
+        "ci-legal": { type: "book", label: "LAW", color: "#ffd36e" },
+        "ci-hotel": { type: "cup", label: "SERV", color: "#7ee0bd" },
+        "ci-language": { type: "book", label: "LANG", color: "#b9a7ff" },
+        "ci-admin3": { type: "info", label: "ADM", color: "#8ec7ff" },
+        "ci-it-lead": { type: "tool", label: "IT", color: "#79f0ca" },
+        "ci-server": { type: "gear", label: "SRV", color: "#ffd36e" },
+        "ci-director": { type: "info", label: "DIR", color: "#f1b36b" },
+        "ci-accounting": { type: "book", label: "ACC", color: "#7ee0bd" },
+        "ci-conference4": { type: "info", label: "MEET", color: "#d8a7ff" }
     };
 
     return profiles[npc.id] || { type: "info", label: "NPC", color: "#d86cff" };
@@ -3228,11 +3438,13 @@ function drawDeskGrid(room, cols, rows, color) {
 
 function drawIndoor(layout) {
     const s = layout.s;
+    const floorBackgrounds = { 1: "#e5e8ec", 2: "#e9edf3", 3: "#ebe7ef", 4: "#e6ecf5" };
+    const hallBackgrounds = { 1: "#cfd6dd", 2: "#d3dbe4", 3: "#dcd4df", 4: "#d3dee9" };
     gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
-    gameCtx.fillStyle = layout.floor === 2 ? "#e9edf3" : "#e5e8ec";
+    gameCtx.fillStyle = floorBackgrounds[layout.floor] || "#e5e8ec";
     gameCtx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
 
-    gameCtx.fillStyle = layout.floor === 2 ? "#d3dbe4" : "#cfd6dd";
+    gameCtx.fillStyle = hallBackgrounds[layout.floor] || "#cfd6dd";
     for (const hall of layout.halls || []) {
         gameCtx.fillRect(hall.x, hall.y, hall.w, hall.h);
     }
@@ -3277,20 +3489,26 @@ function drawIndoor(layout) {
         gameCtx.fillRect(layout.cowork.x + 162 * s, layout.cowork.y + 16 * s, 34 * s, 34 * s);
     }
 
-    const stairZone = layout.upZone || layout.downZone;
-    if (stairZone) {
-        const activeStair = state.interactionTarget && (state.interactionTarget.type === "upstairs" || state.interactionTarget.type === "downstairs");
+    for (const stair of [
+        { zone: layout.downZone, type: "downstairs" },
+        { zone: layout.upZone, type: "upstairs" }
+    ]) {
+        if (!stair.zone) {
+            continue;
+        }
+
+        const activeStair = state.interactionTarget && state.interactionTarget.type === stair.type;
         gameCtx.fillStyle = activeStair ? "#79f0ca" : "#7b8490";
-        gameCtx.fillRect(stairZone.x, stairZone.y, stairZone.w, stairZone.h);
+        gameCtx.fillRect(stair.zone.x, stair.zone.y, stair.zone.w, stair.zone.h);
         gameCtx.strokeStyle = activeStair ? "#06111f" : "rgba(0, 0, 0, 0.24)";
         gameCtx.lineWidth = 2;
-        gameCtx.strokeRect(stairZone.x, stairZone.y, stairZone.w, stairZone.h);
+        gameCtx.strokeRect(stair.zone.x, stair.zone.y, stair.zone.w, stair.zone.h);
         gameCtx.strokeStyle = "rgba(255, 255, 255, 0.62)";
         for (let i = 1; i < 5; i++) {
-            const y = stairZone.y + (stairZone.h / 5) * i;
+            const y = stair.zone.y + (stair.zone.h / 5) * i;
             gameCtx.beginPath();
-            gameCtx.moveTo(stairZone.x + 8 * s, y);
-            gameCtx.lineTo(stairZone.x + stairZone.w - 8 * s, y);
+            gameCtx.moveTo(stair.zone.x + 8 * s, y);
+            gameCtx.lineTo(stair.zone.x + stair.zone.w - 8 * s, y);
             gameCtx.stroke();
         }
     }
@@ -3305,12 +3523,12 @@ function drawIndoor(layout) {
 
     gameCtx.fillStyle = "#213446";
     gameCtx.font = `${Math.max(16, 22 * s)}px Arial`;
-    gameCtx.fillText(layout.floor === 2 ? "Внутренний маршрут / второй этаж" : "Внутренний маршрут / атриум", 24 * s, 30 * s);
+    gameCtx.fillText(`Внутренний маршрут / ${floorName(layout.floor)} этаж`, 24 * s, 30 * s);
     gameCtx.font = `${Math.max(12, 15 * s)}px Arial`;
     if (layout.cowork) gameCtx.fillText("Coworking", layout.cowork.x + 12 * s, layout.cowork.y + 58 * s);
     if (layout.projectHall) gameCtx.fillText("Проектная галерея", layout.projectHall.x + 12 * s, layout.projectHall.y + 58 * s);
-    if (layout.upZone) gameCtx.fillText("2 этаж E", layout.upZone.x + 12 * s, layout.upZone.y - 8 * s);
-    if (layout.downZone) gameCtx.fillText("1 этаж E", layout.downZone.x + 34 * s, layout.downZone.y - 8 * s);
+    if (layout.upZone) gameCtx.fillText(`${layout.floor + 1} этаж E`, layout.upZone.x + 12 * s, layout.upZone.y - 8 * s);
+    if (layout.downZone) gameCtx.fillText(`${layout.floor - 1} этаж E`, layout.downZone.x + 12 * s, layout.downZone.y - 8 * s);
     if (layout.exitZone) gameCtx.fillText("Выход E", layout.exitZone.x + 26 * s, layout.exitZone.y - 8 * s);
 
     for (const hotspot of layout.hotspots) {
@@ -3430,7 +3648,10 @@ function render(layout) {
     drawNpcs(layout);
     drawPlayer();
     drawObjectiveBeacon(layout);
-    drawMinimap(layout);
+
+    if (!minimapPanel.classList.contains("is-collapsed")) {
+        drawMinimap(layout);
+    }
 }
 
 function gameLoop() {

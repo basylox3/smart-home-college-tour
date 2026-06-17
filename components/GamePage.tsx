@@ -118,13 +118,18 @@ export function GamePage({ settings, localFiles }: GamePageProps) {
   return (
     <>
       <InteractiveShell />
-      <main className="page-shell game-page">
+      <a className="skip-link" href="#game-content">
+        Перейти к содержимому
+      </a>
+      <main className="page-shell game-page" id="game-content">
         <header className="site-header">
           <Link className="brand" href="/">
-            <span className="brand-mark">ПК</span>
+            <span className="brand-mark" aria-hidden="true">
+              <img src="/college-logo.svg" alt="" />
+            </span>
             <span className="brand-text">Перспективный колледж</span>
           </Link>
-          <button className="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <button className="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="site-nav">
             <span />
             <span />
           </button>
@@ -154,14 +159,14 @@ export function GamePage({ settings, localFiles }: GamePageProps) {
           </div>
 
           <div className="game-workbench">
-            <aside className="game-file-panel">
+            <aside className="game-file-panel kinetic-item">
               <div className="game-file-panel__head">
                 <div>
                   <p className="eyebrow">Локальные файлы</p>
                   <h2>Что запускать</h2>
                 </div>
                 <button className="control-button" type="button" onClick={refreshFiles} disabled={isRefreshing}>
-                  {isRefreshing ? "Ищу..." : "Обновить"}
+                  {isRefreshing ? "Ищу…" : "Обновить"}
                 </button>
               </div>
 
@@ -169,7 +174,7 @@ export function GamePage({ settings, localFiles }: GamePageProps) {
                 <div className="game-file-list" aria-label="Файлы игры">
                   {sources.map((source) => (
                     <button
-                      className={source.url === selectedSource?.url ? "game-file-card is-active" : "game-file-card"}
+                      className={source.url === selectedSource?.url ? "game-file-card is-active kinetic-item" : "game-file-card kinetic-item"}
                       type="button"
                       key={source.id}
                       onClick={() => setSelectedUrl(source.url)}
@@ -201,7 +206,7 @@ export function GamePage({ settings, localFiles }: GamePageProps) {
               </div>
             </aside>
 
-            <div className={fullscreenRequested ? "game-stage is-fullscreen" : "game-stage"}>
+            <div className={fullscreenRequested ? "game-stage is-fullscreen kinetic-item" : "game-stage kinetic-item"}>
               <div className="game-stage__head">
                 <div>
                   <strong>{selectedSource?.title || "Игра не выбрана"}</strong>

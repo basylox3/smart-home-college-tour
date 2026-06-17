@@ -122,14 +122,19 @@ export function PlansPage() {
   return (
     <>
       <InteractiveShell />
-      <main className="page-shell plans-page">
+      <a className="skip-link" href="#plans-content">
+        Перейти к содержимому
+      </a>
+      <main className="page-shell plans-page" id="plans-content">
         <header className="site-header">
           <Link className="brand" href="/">
-            <span className="brand-mark">ПК</span>
+            <span className="brand-mark" aria-hidden="true">
+              <img src="/college-logo.svg" alt="" />
+            </span>
             <span className="brand-text">Перспективный колледж</span>
           </Link>
 
-          <button className="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <button className="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="site-nav">
             <span />
             <span />
           </button>
@@ -187,7 +192,7 @@ export function PlansPage() {
 
               <div className="plan-summary-grid" aria-label="Основные зоны колледжа">
                 {campusZones.map((zone) => (
-                  <article className="plan-summary-card" key={zone.title}>
+                  <article className="plan-summary-card kinetic-item" key={zone.title}>
                     <span>Зона</span>
                     <h3>{zone.title}</h3>
                     <p>{zone.text}</p>
@@ -210,7 +215,7 @@ export function PlansPage() {
 
           <div className="layout-sheet-grid reveal">
             {floorSheets.map((sheet) => (
-              <figure className="layout-sheet-card" data-tilt key={sheet.title}>
+              <figure className="layout-sheet-card kinetic-item" data-tilt key={sheet.title}>
                 <img src={sheet.src} alt={sheet.alt} loading="lazy" />
                 <figcaption>
                   <strong>{sheet.title}</strong>
@@ -222,7 +227,7 @@ export function PlansPage() {
 
           <div className="floor-grid">
             {floorPlans.map((floor) => (
-              <article className="floor-card reveal" data-tilt key={floor.id}>
+              <article className="floor-card reveal kinetic-item" data-tilt key={floor.id}>
                 <div className="floor-card__top">
                   <div className="floor-card__title">
                     <span className="floor-card__label">Этаж {floor.id}</span>
