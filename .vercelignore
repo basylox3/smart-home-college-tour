@@ -1,4 +1,5 @@
 .next
+.agents
 .vercel
 node_modules
 dist
